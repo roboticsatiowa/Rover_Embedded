@@ -13,6 +13,12 @@
 #define BAUDRATE 115200         // Teensy <---> Jetson
 #define AUTO_STOP_INTERVAL 2000 // milliseconds
 
+#define GRIPPER_ANGLE_OPENED 0
+#define GRIPPER_ANGLE_CLOSED 90
+#define GRIPPER_STEP 5
+
+int gripperAngle = GRIPPER_ANGLE_OPENED;
+
 // TODO toggleable light class
 int headlight_state = 0;
 long lastCmd = AUTO_STOP_INTERVAL;
@@ -28,7 +34,9 @@ Sabertooth *frontWheelMotors;
 Stepper *baseMotor;
 Stepper *wristInclinationMotor;
 Stepper *wristRotationMotor;
-Stepper *gripperMotor;
+
+// Servos
+Servo handServo;
 
 // Encoders
 IncrementalEncoder *baseEncoder;
@@ -55,7 +63,44 @@ void stopAllMotors()
   baseMotor->setSpeed(0);
   wristInclinationMotor->setSpeed(0);
   wristRotationMotor->setSpeed(0);
-  gripperMotor->setSpeed(0);
+}
+
+void setCameraMountSpeed(int direction)
+{
+  if (direction > 0)
+  {
+    digitalWrite(CAMERA_MOUNT_MOTOR_IN1, HIGH);
+    digitalWrite(CAMERA_MOUNT_MOTOR_IN2, LOW);
+  }
+  else if (direction < 0)
+  {
+    digitalWrite(CAMERA_MOUNT_MOTOR_IN1, LOW);
+    digitalWrite(CAMERA_MOUNT_MOTOR_IN2, HIGH);
+  }
+  else
+  {
+    digitalWrite(CAMERA_MOUNT_MOTOR_IN1, LOW);
+    digitalWrite(CAMERA_MOUNT_MOTOR_IN2, LOW);
+  }
+}
+
+void setCameraMountSpeed(int direction)
+{
+  if (direction > 0)
+  {
+    digitalWrite(CAMERA_MOUNT_MOTOR_IN1, HIGH);
+    digitalWrite(CAMERA_MOUNT_MOTOR_IN2, LOW);
+  }
+  else if (direction < 0)
+  {
+    digitalWrite(CAMERA_MOUNT_MOTOR_IN1, LOW);
+    digitalWrite(CAMERA_MOUNT_MOTOR_IN2, HIGH);
+  }
+  else
+  {
+    digitalWrite(CAMERA_MOUNT_MOTOR_IN1, LOW);
+    digitalWrite(CAMERA_MOUNT_MOTOR_IN2, LOW);
+  }
 }
 
 /* Run a command.  Commands are defined in commands.h */
@@ -72,24 +117,15 @@ int runCommand(char cmd, String args[], int numArgs)
     break;
 
   case STEPPER_RAW:
-
-    if (index == 0)
-    {
-      baseMotor->setSpeed(args[1].toInt());
+    if (index == 0) {
+        baseMotor->setSpeed(args[1].toInt());
     }
-    else if (index == 1)
-    {
-      wristInclinationMotor->setSpeed(args[1].toInt());
+    else if (index == 1) {
+        wristInclinationMotor->setSpeed(args[1].toInt());
     }
-    else if (index == 2)
-    {
-      wristRotationMotor->setSpeed(args[1].toInt());
+    else if (index == 2) {
+        wristRotationMotor->setSpeed(args[1].toInt());
     }
-    else if (index == 3)
-    {
-      gripperMotor->setSpeed(args[1].toInt());
-    }
-
     break;
 
     // case READ_ENCODER:
@@ -110,7 +146,7 @@ int runCommand(char cmd, String args[], int numArgs)
     backWheelMotors->setSpeed(args[0].toInt(), args[1].toInt());
     midWheelMotors->setSpeed(args[0].toInt(), args[1].toInt());
     frontWheelMotors->setSpeed(args[0].toInt(), args[1].toInt());
-    Serial.println(String(args[0].toInt()) + " " + String(args[1].toInt()));
+    // Serial.println(String(args[0].toInt()) + " " + String(args[1].toInt()));
     break;
 
   case ACTUATOR_RAW:
@@ -118,12 +154,7 @@ int runCommand(char cmd, String args[], int numArgs)
     break;
 
   case DISABLE_PINS:
-    // stopAllMotors();
-    Serial.println("OK");
-    break;
-
-  case HEADLIGHT_CONTROL:
-    digitalToggleFast(HEADLIGHT);
+    stopAllMotors();
     break;
 
   case WARNING_LIGHT:
@@ -139,6 +170,53 @@ int runCommand(char cmd, String args[], int numArgs)
   case READ_BATTERY_VOLTAGE:
     Serial.println(((analogRead(BATTERY_VOLTAGE) * 5.0) / 1024.0) * (7500.0 + 30000.0) / 7500.0, 2);
     break;
+
+  case HAND_SERVO:
+    gripperArg = args[0].toInt();
+
+    // 1 = open
+    if (gripperArg == 1)
+    {
+        gripperAngle -= GRIPPER_STEP;
+
+        if (gripperAngle < GRIPPER_ANGLE_OPENED)
+        {
+            gripperAngle = GRIPPER_ANGLE_OPENED;
+        }
+
+        handServo.write(gripperAngle);
+
+        Serial.print("Opening gripper: ");
+        Serial.println(gripperAngle);
+    }
+
+    // -1 = close
+    else if (gripperArg == -1)
+    {
+        gripperAngle += GRIPPER_STEP;
+
+        if (gripperAngle > GRIPPER_ANGLE_CLOSED)
+        {
+            gripperAngle = GRIPPER_ANGLE_CLOSED;
+        }
+
+        handServo.write(gripperAngle);
+
+        Serial.print("Closing gripper: ");
+        Serial.println(gripperAngle);
+    }
+
+    break;
+
+  // TODO: ADD in the headlight command and camera mount commands
+  case CAMERA_MOUNT:
+    setCameraMountSpeed(args[0].toInt());
+    break;
+
+  // case HEADLIGHT_CONTROL:
+  //  headlight_state = !headlight_state;
+  //  digitalWrite(LED_HEADLIGHT, headlight_state);
+  //  break;
 
   default:
     Serial.println("Invalid Command");
@@ -214,7 +292,11 @@ void setup()
   baseMotor = new Stepper(BASEMOTOR_PUL, BASEMOTOR_DIR);
   wristInclinationMotor = new Stepper(WRIST_INCLINATION_PUL, WRIST_INCLINATION_DIR);
   wristRotationMotor = new Stepper(WRIST_ROTATION_PUL, WRIST_ROTATION_DIR);
-  gripperMotor = new Stepper(GRIPPER_PUL, GRIPPER_DIR);
+
+  // HAnd servo setup/initializing
+  handServo.attach(HAND_GRIPPER_SERVO);
+  gripperAngle = GRIPPER_ANGLE_OPENED;
+  handServo.write(gripperAngle);
 
   // Initialize encoders
   // baseEncoder = new IncrementalEncoder(BASEMOTOR_ENC_A, BASEMOTOR_ENC_B);
@@ -226,13 +308,18 @@ void setup()
   pinMode(ELBOW_POTENTIOMETER, INPUT);
   pinMode(SHOULDER_POTENTIOMETER, INPUT);
 
-  // misc pins
+  // initialize camera mount pins as outputs
+  pinMode(CAMERA_MOUNT_MOTOR_IN1, OUTPUT);
+  pinMode(CAMERA_MOUNT_MOTOR_IN2, OUTPUT);
+
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(HEADLIGHT, OUTPUT);
+
+  // misc pins
+  pinMode(LED_HEADLIGHT, OUTPUT);
 
   pinMode(BATTERY_VOLTAGE, INPUT);
 
-  digitalWrite(HEADLIGHT, LOW);
+  digitalWrite(LED_HEADLIGHT, LOW);
 
   // Allow external hardware some time to boot up
   delay(100);

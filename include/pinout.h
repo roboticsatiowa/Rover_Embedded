@@ -17,15 +17,23 @@
 #define WRIST_INCLINATION_ENC_A 17
 #define WRIST_INCLINATION_ENC_B 18
 
-#define WRIST_ROTATION_PUL 37
-#define WRIST_ROTATION_DIR 38
+#define WRIST_ROTATION_PUL 20
+#define WRIST_ROTATION_DIR 23
 #define WRIST_ROTATION_ENC_A 39
 #define WRIST_ROTATION_ENC_B 40
 
-#define GRIPPER_PUL 33
-#define GRIPPER_DIR 34 
-#define GRIPPER_ENC_A 35
-#define GRIPPER_ENC_B 36
+#define HAND_GRIPPER_SERVO 11
+
+//#define GRIPPER_PUL 33
+//#define GRIPPER_DIR 34 
+//#define GRIPPER_ENC_A 35
+//#define GRIPPER_ENC_B 36
+
+// ----------------- Camera Mount Motor ---------------------------
+
+// Decide the pinout for the mounts
+#define CAMERA_MOUNT_MOTOR_IN1 5
+#define CAMERA_MOUNT_MOTOR_IN2 6
 
 // ---------------- Serial Port Assignments ----------------
 
@@ -43,6 +51,6 @@
 
 // ---------------- Misc Pin Assignments ----------------
 
-#define HEADLIGHT 9
+#define LED_HEADLIGHT 3
 
 #endif

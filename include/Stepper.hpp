@@ -55,6 +55,8 @@ public:
         }
 
         freq_hz = (int) lerp(speed, 0, 255, min_freq_hz, max_freq_hz);
+
+        // I CHANGED THIS RESET IT BACK IF NO WORKY
         period_us = 100000 / freq_hz;
 
         Serial.println("Speed: " + String(speed) + " Freq: " + String(freq_hz) + " Period: " + String(period_us));
