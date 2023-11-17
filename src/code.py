@@ -1,16 +1,33 @@
 import serial
 
-while True:
-    ser = serial.Serial('/dev/cu.usbmodem139592901', 9600)
-    print("HHHII")
-    driveForward()
+baud = 9600
+ser = serial.Serial('/dev/ttyUSB0', baud)
 
+while True:
+    print("HEFSDGHJTREWQW")
 
 def driveForward(jetson_message):
     jetson_message= input('Put in address: ')
 
     address = jetson_message[2:8]
+    direction = jetson_message[8]
+    enable = jeston_message[9]
     speed = jetson_message[10:]
 
-    ser.write(int((address+0+speed)& 0b01111111))
-    print('This fucking worked')
+    #if (address == 0001):
+    #set to left port
+
+    if (speed == 0):
+        stop()
+
+    elif (direction == 0):
+        speed = -speed
+    
+    ST.motor(motorL,speed)
+
+
+
+
+
+
+ser.close()
