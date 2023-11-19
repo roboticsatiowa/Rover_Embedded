@@ -1,1 +1,0 @@
-cp src/* /media/$USER/CIRCUITPY
