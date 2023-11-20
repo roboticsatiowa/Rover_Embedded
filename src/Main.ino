@@ -45,26 +45,12 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+// ---------------------- DEFINES ----------------------
+
 #define USE_BASE  // Enable the base controller code
-//#undef USE_BASE     // Disable the base controller code
-
-/* Define the motor controller and encoder library you are using */
-#ifdef USE_BASE
-/* The Pololu VNH5019 dual motor driver shield */
-//#define POLOLU_VNH5019
-
-/* The Pololu MC33926 dual motor driver shield */
-//#define POLOLU_MC33926
-
-/* The RoboGaia encoder shield */
-//#define ROBOGAIA
 
 /* Encoders directly attached to Arduino board */
 #define ARDUINO_ENC_COUNTER
-
-/* L298 Motor driver*/
-#define L298_MOTOR_DRIVER
-#endif
 
 //#define USE_SERVOS  // Enable use of PWM servos as defined in servos.h
 #undef USE_SERVOS  // Disable use of PWM servos
@@ -74,6 +60,11 @@
 
 /* Maximum PWM signal */
 #define MAX_PWM 255
+
+/* Run the PID loop at 30 times per second */
+#define PID_RATE 30  // Hz
+
+// ---------------------- INCLUDES ----------------------
 
 #include "Arduino.h"
 
@@ -89,6 +80,8 @@
 #include "servos.h"
 #endif
 
+
+
 #ifdef USE_BASE
 /* Motor driver function definitions */
 #include "motor_driver.h"
@@ -98,9 +91,6 @@
 
 /* PID parameters and functions */
 #include "diff_controller.h"
-
-/* Run the PID loop at 30 times per second */
-#define PID_RATE 30  // Hz
 
 /* Convert the rate into an interval */
 const int PID_INTERVAL = 1000 / PID_RATE;
@@ -127,12 +117,21 @@ char chr;
 char cmd;
 
 // Character arrays to hold the first and second arguments
+// Could be replaced with a more elegant solution but im tired and this works
 char argv1[16];
 char argv2[16];
+char argv3[16];
+char argv4[16];
+char argv5[16];
+char argv6[16];
 
 // The arguments converted to integers
 long arg1;
 long arg2;
+long arg3;
+long arg4;
+long arg5;
+long arg6;
 
 /* Clear the current command parameters */
 void resetCommand()
@@ -140,8 +139,16 @@ void resetCommand()
   cmd = NULL;
   memset(argv1, 0, sizeof(argv1));
   memset(argv2, 0, sizeof(argv2));
+  memset(argv3, 0, sizeof(argv3));
+  memset(argv4, 0, sizeof(argv4));
+  memset(argv5, 0, sizeof(argv5));
+  memset(argv6, 0, sizeof(argv6));
   arg1 = 0;
   arg2 = 0;
+  arg3 = 0;
+  arg4 = 0;
+  arg5 = 0;
+  arg6 = 0;
   arg = 0;
   index = 0;
 }
