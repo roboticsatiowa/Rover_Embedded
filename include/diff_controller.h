@@ -5,6 +5,11 @@
    http://vanadium-ros-pkg.googlecode.com/svn/trunk/arbotix/
 */
 
+#include "encoder_driver.h"
+#include "Arduino.h"
+#include "commands.h"
+#include "motor_driver.h"
+
 /* PID setpoint info For a Motor */
 typedef struct {
   double TargetTicksPerFrame;    // target speed in ticks per frame
