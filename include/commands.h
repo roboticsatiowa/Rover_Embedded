@@ -21,7 +21,6 @@
 
 // actuator potentiometers
 #define ACTUATOR_POTENTIONMETER_READ 'i'
-#define ACTUATOR_POTENTIONMETER_CALIBRATE 'j' // TODO not really sure how this is gonna work yet or if it's even necessary
 
 // Motors
 #define MOTOR_SPEEDS   'k'
