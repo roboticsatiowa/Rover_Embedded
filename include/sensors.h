@@ -1,5 +1,8 @@
 /* Functions for various sensor types */
 
+#ifndef SENSORS_H
+#define SENSORS_H
+
 #include <Arduino.h>
 
 float microsecondsToCm(long microseconds) {
@@ -9,6 +12,8 @@ float microsecondsToCm(long microseconds) {
   return microseconds / 29 / 2;
 }
 
+
+// Distance sensor
 long Ping(int pin) {
   long duration, range;
 
@@ -32,3 +37,5 @@ long Ping(int pin) {
 
   return (range);
 }
+
+#endif
