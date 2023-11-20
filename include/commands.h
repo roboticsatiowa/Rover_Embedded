@@ -7,31 +7,40 @@
 
 // Manual pin control. Do not use in production
 #define ANALOG_READ    'a'
-#define ANALOG_WRITE   'x'
-#define DIGITAL_READ   'd'
-#define DIGITAL_WRITE  'w'
+#define ANALOG_WRITE   'b'
+#define DIGITAL_READ   'c'
+#define DIGITAL_WRITE  'd'
 
 // Encoders
 #define READ_ENCODERS  'e'
-#define RESET_ENCODERS 'r'
+#define RESET_ENCODERS 'f'
+
+// Actuators
+#define ACTUATOR_SPEEDS 'g'
+#define ACTUATOR_RAW_THROTTLE 'h'
+
+// actuator potentiometers
+#define ACTUATOR_POTENTIONMETER_READ 'i'
+#define ACTUATOR_POTENTIONMETER_CALIBRATE 'j' // TODO not really sure how this is gonna work yet or if it's even necessary
 
 // Motors
-#define MOTOR_SPEEDS   'm'
-#define MOTOR_RAW_PWM  'o'
+#define MOTOR_SPEEDS   'k'
+#define MOTOR_RAW_PWM  'l'
 
-// Servos   
-#define SERVO_WRITE    's'
-#define SERVO_READ     't'
+// Steppers   
+#define STEPPER_SPEEDS    'm'
+#define STEPPER_RAW_DUTYCYCLE 'o'
 
 // Misc commands
-#define GET_BAUDRATE   'b'
-#define PIN_MODE       'c'
-#define PING           'p'
-#define UPDATE_PID     'u'
+#define GET_BAUDRATE   'p'
+#define PIN_MODE       'q'
+#define PING           'r'
+#define UPDATE_PID     's'
 
 // *Not Commands*
 #define LEFT            0
 #define RIGHT           1
+#define MAX_PWM         255
 
 #endif
 
