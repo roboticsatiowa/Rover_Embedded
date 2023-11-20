@@ -58,9 +58,6 @@
 /* Serial port baud rate */
 #define BAUDRATE 57600
 
-/* Maximum PWM signal */
-#define MAX_PWM 255
-
 /* Run the PID loop at 30 times per second */
 #define PID_RATE 30  // Hz
 
