@@ -5,20 +5,31 @@
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
+// Manual pin control. Do not use in production
 #define ANALOG_READ    'a'
-#define GET_BAUDRATE   'b'
-#define PIN_MODE       'c'
+#define ANALOG_WRITE   'x'
 #define DIGITAL_READ   'd'
+#define DIGITAL_WRITE  'w'
+
+// Encoders
 #define READ_ENCODERS  'e'
+#define RESET_ENCODERS 'r'
+
+// Motors
 #define MOTOR_SPEEDS   'm'
 #define MOTOR_RAW_PWM  'o'
-#define PING           'p'
-#define RESET_ENCODERS 'r'
+
+// Servos   
 #define SERVO_WRITE    's'
 #define SERVO_READ     't'
+
+// Misc commands
+#define GET_BAUDRATE   'b'
+#define PIN_MODE       'c'
+#define PING           'p'
 #define UPDATE_PID     'u'
-#define DIGITAL_WRITE  'w'
-#define ANALOG_WRITE   'x'
+
+// *Not Commands*
 #define LEFT            0
 #define RIGHT           1
 
