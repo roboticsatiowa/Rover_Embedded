@@ -9,35 +9,27 @@
 
 #include "Arduino.h"
 #include "commands.h"
+#include "pinout.h"
+#include "encoder_driver.h"
 
 // Not sure how this code works
 
 volatile long left_enc_pos = 0L;
 volatile long right_enc_pos = 0L;
 
-// based on the valid states inside an encoder. NOTE: Will most likely need to be changed. each state is a 4 bit number (16 combinations) and corresponds to a direction
-static const int8_t ENC_STATES[] = { 0, 1, -1, 0, -1, 0, 0, 1, 1, 0, 0, -1, 0, -1, 1, 0 };
+// based on the valid states inside an encoder. NOTE: Will most likely need to be changed. each state is a 4 bit number
+// (16 combinations) and corresponds to a direction
+static const int8_t ENC_STATES[] = {0, 1, -1, 0, -1, 0, 0, 1, 1, 0, 0, -1, 0, -1, 1, 0};
 
-/* Interrupt routine for LEFT encoder, taking care of actual counting */
-ISR(PCINT2_vect)
+/* Interrupt routine for encoder, taking care of actual counting */
+void ISR(int addr)
 {
   static uint8_t enc_last = 0;
 
-  enc_last <<= 2;                      // shift previous state two places
-  enc_last |= (PIND & (3 << 2)) >> 2;  // read the current state into lowest 2 bits
+  enc_last <<= 2;                     // shift previous state two places
+  enc_last |= (PIND & (3 << 2)) >> 2; // read the current state into lowest 2 bits
 
   left_enc_pos += ENC_STATES[(enc_last & 0x0f)];
-}
-
-/* Interrupt routine for RIGHT encoder, taking care of actual counting */
-ISR(PCINT1_vect)
-{
-  static uint8_t enc_last = 0;
-
-  enc_last <<= 2;                      // shift previous state two places
-  enc_last |= (PINC & (3 << 4)) >> 4;  // read the current state into lowest 2 bits
-
-  right_enc_pos += ENC_STATES[(enc_last & 0x0f)];
 }
 
 /* Wrap the encoder reading function */
@@ -69,4 +61,24 @@ void resetEncoders()
 {
   resetEncoder(LEFT);
   resetEncoder(RIGHT);
+}
+
+inline void WRIST_INCLINATION_ISR()
+{
+  ISR(WRIST_INCLINATION);
+}
+
+inline void WRIST_ROTATION_ISR()
+{
+  ISR(WRIST_ROTATION);
+}
+
+inline void GRIPPER_ISR()
+{
+  ISR(GRIPPER);
+}
+
+inline void BASEMOTOR_ISR()
+{
+  ISR(BASEMOTOR);
 }
