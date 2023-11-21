@@ -47,14 +47,6 @@
 
 // ---------------------- DEFINES ----------------------
 
-#define USE_BASE  // Enable the base controller code
-
-/* Encoders directly attached to Arduino board */
-#define ARDUINO_ENC_COUNTER
-
-//#define USE_SERVOS  // Enable use of PWM servos as defined in servos.h
-#undef USE_SERVOS  // Disable use of PWM servos
-
 /* Serial port baud rate */
 #define BAUDRATE 57600
 
@@ -64,30 +56,12 @@
 // ---------------------- INCLUDES ----------------------
 
 #include "Arduino.h"
-
-/* Include definition of serial commands */
 #include "commands.h"
-
-/* Sensor functions */
+#include "pinout.h"
 #include "sensors.h"
-
-/* Include servo support if required */
-#ifdef USE_SERVOS
-#include <Servo.h>
-#include "servos.h"
-#endif
-
-
-
-#ifdef USE_BASE
-/* Motor driver function definitions */
 #include "motor_driver.h"
-
-/* Encoder driver function definitions */
 #include "encoder_driver.h"
-
-/* PID parameters and functions */
-#include "diff_controller.h"
+#include "pid_controller.h"
 
 /* Convert the rate into an interval */
 const int PID_INTERVAL = 1000 / PID_RATE;
@@ -99,13 +73,12 @@ unsigned long nextPID = PID_INTERVAL;
  in this number of milliseconds */
 #define AUTO_STOP_INTERVAL 2000
 long lastMotorCommand = AUTO_STOP_INTERVAL;
-#endif
 
 /* Variable initialization */
 
 // A pair of varibles to help parse serial commands (thanks Fergs)
 int arg = 0;
-int index = 0;
+int arg_index = 0;
 
 // Variable to hold an input character
 char chr;
@@ -147,7 +120,7 @@ void resetCommand()
   arg5 = 0;
   arg6 = 0;
   arg = 0;
-  index = 0;
+  arg_index = 0;
 }
 
 /* Run a command.  Commands are defined in commands.h */
@@ -260,41 +233,31 @@ void setup()
 {
   Serial.begin(BAUDRATE);
 
-// Initialize the motor controller if used */
-#ifdef USE_BASE
-#ifdef ARDUINO_ENC_COUNTER
-  // set as inputs
-  DDRD &= ~(1 << LEFT_ENC_PIN_A);
-  DDRD &= ~(1 << LEFT_ENC_PIN_B);
-  DDRC &= ~(1 << RIGHT_ENC_PIN_A);
-  DDRC &= ~(1 << RIGHT_ENC_PIN_B);
+  // initialize stepper encoder pins as inputs
+  pinMode(BASEMOTOR_ENC_A, INPUT_PULLUP);
+  pinMode(BASEMOTOR_ENC_B, INPUT_PULLUP);
+  pinMode(WRIST_INCLINATION_ENC_A, INPUT_PULLUP);
+  pinMode(WRIST_INCLINATION_ENC_B, INPUT_PULLUP);
+  pinMode(WRIST_ROTATION_ENC_A, INPUT_PULLUP);
+  pinMode(WRIST_ROTATION_ENC_B, INPUT_PULLUP);
+  pinMode(GRIPPER_ENC_A, INPUT_PULLUP);
+  pinMode(GRIPPER_ENC_B, INPUT_PULLUP);
 
-  // enable pull up resistors
-  PORTD |= (1 << LEFT_ENC_PIN_A);
-  PORTD |= (1 << LEFT_ENC_PIN_B);
-  PORTC |= (1 << RIGHT_ENC_PIN_A);
-  PORTC |= (1 << RIGHT_ENC_PIN_B);
+  // attach interrupts to encoder pins
+  attachInterrupt(digitalPinToInterrupt(BASEMOTOR_ENC_A), BASEMOTOR_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(BASEMOTOR_ENC_B), BASEMOTOR_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(WRIST_INCLINATION_ENC_A), WRIST_INCLINATION_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(WRIST_INCLINATION_ENC_B), WRIST_INCLINATION_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(WRIST_ROTATION_ENC_A), WRIST_ROTATION_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(WRIST_ROTATION_ENC_B), WRIST_ROTATION_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(GRIPPER_ENC_A), GRIPPER_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(GRIPPER_ENC_B), GRIPPER_ISR, CHANGE);
 
-  // tell pin change mask to listen to left encoder pins
-  PCMSK2 |= (1 << LEFT_ENC_PIN_A) | (1 << LEFT_ENC_PIN_B);
-  // tell pin change mask to listen to right encoder pins
-  PCMSK1 |= (1 << RIGHT_ENC_PIN_A) | (1 << RIGHT_ENC_PIN_B);
-
-  // enable PCINT1 and PCINT2 interrupt in the general interrupt mask
-  PCICR |= (1 << PCIE1) | (1 << PCIE2);
-#endif
   initMotorController();
+  // TODO initialize stepper motors
+  // TODO initialize linear actuators
+  // TODO initialize linear actuators
   resetPID();
-#endif
-
-  /* Attach servos if used */
-#ifdef USE_SERVOS
-  int i;
-  for (i = 0; i < N_SERVOS; i++)
-  {
-    servos[i].initServo(servoPins[i], stepDelay[i], servoInitPosition[i]);
-  }
-#endif
 }
 
 /* Enter the main loop.  Read and parse input from the serial port
@@ -312,9 +275,9 @@ void loop()
     if (chr == 13)
     {
       if (arg == 1)
-        argv1[index] = NULL;
+        argv1[arg_index] = NULL;
       else if (arg == 2)
-        argv2[index] = NULL;
+        argv2[arg_index] = NULL;
       runCommand();
       resetCommand();
     }
@@ -326,9 +289,9 @@ void loop()
         arg = 1;
       else if (arg == 1)
       {
-        argv1[index] = NULL;
+        argv1[arg_index] = NULL;
         arg = 2;
-        index = 0;
+        arg_index = 0;
       }
       continue;
     }
@@ -342,19 +305,18 @@ void loop()
       else if (arg == 1)
       {
         // Subsequent arguments can be more than one character
-        argv1[index] = chr;
-        index++;
+        argv1[arg_index] = chr;
+        arg_index++;
       }
       else if (arg == 2)
       {
-        argv2[index] = chr;
-        index++;
+        argv2[arg_index] = chr;
+        arg_index++;
       }
     }
   }
 
 // If we are using base control, run a PID calculation at the appropriate intervals
-#ifdef USE_BASE
   if (millis() > nextPID)
   {
     updatePID();
@@ -364,18 +326,7 @@ void loop()
   // Check to see if we have exceeded the auto-stop interval
   if ((millis() - lastMotorCommand) > AUTO_STOP_INTERVAL)
   {
-    ;
     setMotorSpeeds(0, 0);
     moving = 0;
   }
-#endif
-
-// Sweep servos
-#ifdef USE_SERVOS
-  int i;
-  for (i = 0; i < N_SERVOS; i++)
-  {
-    servos[i].doSweep();
-  }
-#endif
 }
