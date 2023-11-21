@@ -10,6 +10,7 @@
 #include "Arduino.h"
 #include "motor_driver.h"
 #include "commands.h"
+#include "pinout.h"
 
 #define MAX_PWM 255
 
