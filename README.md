@@ -42,5 +42,6 @@ This code is for the PJRC Teensy 4.1 development board. These instructions are t
     - [ ] Speed control
 - [ ] Hardware addressing
 - [ ] Unit testing (lol probably not)
-- [ ] Documentation
+- [ ] Servo support
+- [ ] Independent wheel motor control
 - [ ] Limit switch calibration (unnecessary if we switch to servos)
