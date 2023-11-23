@@ -51,7 +51,7 @@
 #define BAUDRATE 57600
 
 /* Run the PID loop at 30 times per second */
-#define PID_RATE 30  // Hz
+#define PID_RATE 30 // Hz
 
 // ---------------------- INCLUDES ----------------------
 
@@ -85,40 +85,23 @@ char chr;
 
 // Variable to hold the current single-character command
 char cmd;
-
 // Character arrays to hold the first and second arguments
 // Could be replaced with a more elegant solution but im tired and this works
 char argv1[16];
 char argv2[16];
-char argv3[16];
-char argv4[16];
-char argv5[16];
-char argv6[16];
-
 // The arguments converted to integers
 long arg1;
 long arg2;
-long arg3;
-long arg4;
-long arg5;
-long arg6;
 
 /* Clear the current command parameters */
 void resetCommand()
 {
-  cmd = NULL;
+  cmd = '\0';
   memset(argv1, 0, sizeof(argv1));
   memset(argv2, 0, sizeof(argv2));
-  memset(argv3, 0, sizeof(argv3));
-  memset(argv4, 0, sizeof(argv4));
-  memset(argv5, 0, sizeof(argv5));
-  memset(argv6, 0, sizeof(argv6));
+
   arg1 = 0;
   arg2 = 0;
-  arg3 = 0;
-  arg4 = 0;
-  arg5 = 0;
-  arg6 = 0;
   arg = 0;
   arg_index = 0;
 }
@@ -126,112 +109,103 @@ void resetCommand()
 /* Run a command.  Commands are defined in commands.h */
 int runCommand()
 {
+  Serial.print("Command: " + String(cmd) + " " + String(argv1) + " " + String(argv2) + "\n");
+
   int i = 0;
-  char* p = argv1;
-  char* str;
+  char *p = argv1;
+  char *str;
   int pid_args[4];
   arg1 = atoi(argv1);
   arg2 = atoi(argv2);
 
   switch (cmd)
   {
-    case GET_BAUDRATE:
-      Serial.println(BAUDRATE);
-      break;
-    case ANALOG_READ:
-      Serial.println(analogRead(arg1));
-      break;
-    case DIGITAL_READ:
-      Serial.println(digitalRead(arg1));
-      break;
-    case ANALOG_WRITE:
-      analogWrite(arg1, arg2);
-      Serial.println("OK");
-      break;
-    case DIGITAL_WRITE:
-      if (arg2 == 0)
-        digitalWrite(arg1, LOW);
-      else if (arg2 == 1)
-        digitalWrite(arg1, HIGH);
-      Serial.println("OK");
-      break;
-    case PIN_MODE:
-      if (arg2 == 0)
-        pinMode(arg1, INPUT);
-      else if (arg2 == 1)
-        pinMode(arg1, OUTPUT);
-      Serial.println("OK");
-      break;
-    case PING:
-      Serial.println(Ping(arg1));
-      break;
+  case GET_BAUDRATE:
+    Serial.println(BAUDRATE);
+    break;
+  case PIN_MODE:
+    if (arg2 == 0)
+      pinMode(arg1, INPUT);
+    else if (arg2 == 1)
+      pinMode(arg1, OUTPUT);
+    Serial.println("OK");
+    break;
+  case PING:
+    Serial.println(Ping(arg1));
+    break;
+  case READ_ACTUATOR_POTENTIOMETER:
+    Serial.print(String(analogRead(SHOULDER_POTENTIOMETER)) + " " + String(analogRead(ELBOW_POTENTIOMETER)));
+    break;
 #ifdef USE_SERVOS
-    case SERVO_WRITE:
-      servos[arg1].setTargetPosition(arg2);
-      Serial.println("OK");
-      break;
-    case SERVO_READ:
-      Serial.println(servos[arg1].getServo().read());
-      break;
+  case SERVO_WRITE:
+    servos[arg1].setTargetPosition(arg2);
+    Serial.println("OK");
+    break;
+  case SERVO_READ:
+    Serial.println(servos[arg1].getServo().read());
+    break;
 #endif
-
-#ifdef USE_BASE
-    case READ_ENCODERS:
-      Serial.print(readEncoder(LEFT));
-      Serial.print(" ");
-      Serial.println(readEncoder(RIGHT));
-      break;
-    case RESET_ENCODERS:
-      resetEncoders();
+  case READ_ENCODER:
+    for (int i = 0; i < 4; i++)
+    {
+      Serial.print(String(readEncoder(i)) + " ");
+    }
+    break;
+  case RESET_ENCODERS:
+    resetEncoders();
+    resetPID();
+    Serial.println("OK");
+    break;
+  case MOTOR_SPEEDS:
+    /* Reset the auto stop timer */
+    lastMotorCommand = millis();
+    if (arg1 == 0 && arg2 == 0)
+    {
+      setMotorSpeeds(0, 0);
       resetPID();
-      Serial.println("OK");
-      break;
-    case MOTOR_SPEEDS:
-      /* Reset the auto stop timer */
-      lastMotorCommand = millis();
-      if (arg1 == 0 && arg2 == 0)
-      {
-        setMotorSpeeds(0, 0);
-        resetPID();
-        moving = 0;
-      }
-      else
-        moving = 1;
-      leftPID.TargetTicksPerFrame = arg1;
-      rightPID.TargetTicksPerFrame = arg2;
-      Serial.println("OK");
-      break;
-    case MOTOR_RAW_PWM:
-      /* Reset the auto stop timer */
-      lastMotorCommand = millis();
-      resetPID();
-      moving = 0;  // Sneaky way to temporarily disable the PID
-      setMotorSpeeds(arg1, arg2);
-      Serial.println("OK");
-      break;
-    case UPDATE_PID:
-      while ((str = strtok_r(p, ":", &p)) != '\0')
-      {
-        pid_args[i] = atoi(str);
-        i++;
-      }
-      Kp = pid_args[0];
-      Kd = pid_args[1];
-      Ki = pid_args[2];
-      Ko = pid_args[3];
-      Serial.println("OK");
-      break;
-#endif
-    default:
-      Serial.println("Invalid Command");
-      break;
+      moving = 0;
+    }
+    else
+      moving = 1;
+    leftPID.TargetTicksPerFrame = arg1;
+    rightPID.TargetTicksPerFrame = arg2;
+    Serial.println("OK");
+    break;
+  case MOTOR_RAW_PWM:
+    /* Reset the auto stop timer */
+    lastMotorCommand = millis();
+    resetPID();
+    moving = 0; // Sneaky way to temporarily disable the PID
+    setMotorSpeeds(arg1, arg2);
+    Serial.println("OK");
+    break;
+  case UPDATE_PID:
+    while (*(str = strtok_r(p, ":", &p)) != '\0')
+    {
+      pid_args[i] = atoi(str);
+      i++;
+    }
+    Kp = pid_args[0];
+    Kd = pid_args[1];
+    Ki = pid_args[2];
+    Ko = pid_args[3];
+    Serial.println("OK");
+    break;
+  default:
+    Serial.println("Invalid Command");
+    break;
   }
+
+  return 0;
 }
 
 /* Setup function--runs once at startup. */
 void setup()
 {
   Serial.begin(BAUDRATE);
+
+  // initialize linear actuator serial port
+  LINEAR_ACTUATOR_SERIAL.begin(9700);
 
   // initialize stepper encoder pins as inputs
   pinMode(BASEMOTOR_ENC_A, INPUT_PULLUP);
@@ -253,11 +227,37 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(GRIPPER_ENC_A), GRIPPER_ISR, CHANGE);
   attachInterrupt(digitalPinToInterrupt(GRIPPER_ENC_B), GRIPPER_ISR, CHANGE);
 
-  initMotorController();
-  // TODO initialize stepper motors
-  // TODO initialize linear actuators
-  // TODO initialize linear actuators
+  // initialize potentiometer pins as inputs
+  pinMode(ELBOW_POTENTIOMETER, INPUT);
+  pinMode(SHOULDER_POTENTIOMETER, INPUT);
+
+  // initialize motor driver pins as outputs
+  pinMode(R_WHEEL_DIR, OUTPUT);
+  pinMode(L_WHEEL_DIR, OUTPUT);
+  pinMode(R_FWD_WHEEL_PUL, OUTPUT);
+  pinMode(R_MID_WHEEL_PUL, OUTPUT);
+  pinMode(R_BCK_WHEEL_PUL, OUTPUT);
+  pinMode(L_FWD_WHEEL_PUL, OUTPUT);
+  pinMode(L_MID_WHEEL_PUL, OUTPUT);
+  pinMode(L_BCK_WHEEL_PUL, OUTPUT);
+
+  // initialize stepper motor pins as outputs
+  pinMode(BASEMOTOR_DIR, OUTPUT);
+  pinMode(BASEMOTOR_PUL, OUTPUT);
+  pinMode(WRIST_INCLINATION_DIR, OUTPUT);
+  pinMode(WRIST_INCLINATION_PUL, OUTPUT);
+  pinMode(WRIST_ROTATION_DIR, OUTPUT);
+  pinMode(WRIST_ROTATION_PUL, OUTPUT);
+  pinMode(GRIPPER_DIR, OUTPUT);
+  pinMode(GRIPPER_PUL, OUTPUT);
+
+  // TODO initialize servo motors
   resetPID();
+
+  delay(5); // give some time for setup (5 milliseconds - shouldn't make a perceptible difference)
+
+  pinMode(GLOBAL_ENABLE, OUTPUT);
+  digitalWrite(GLOBAL_ENABLE, HIGH);
 }
 
 /* Enter the main loop.  Read and parse input from the serial port
@@ -275,9 +275,9 @@ void loop()
     if (chr == 13)
     {
       if (arg == 1)
-        argv1[arg_index] = NULL;
+        argv1[arg_index] = '\0';
       else if (arg == 2)
-        argv2[arg_index] = NULL;
+        argv2[arg_index] = '\0';
       runCommand();
       resetCommand();
     }
@@ -289,7 +289,7 @@ void loop()
         arg = 1;
       else if (arg == 1)
       {
-        argv1[arg_index] = NULL;
+        argv1[arg_index] = '\0';
         arg = 2;
         arg_index = 0;
       }
@@ -316,7 +316,7 @@ void loop()
     }
   }
 
-// If we are using base control, run a PID calculation at the appropriate intervals
+  // If we are using base control, run a PID calculation at the appropriate intervals
   if (millis() > nextPID)
   {
     updatePID();

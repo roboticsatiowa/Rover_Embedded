@@ -17,50 +17,70 @@
 volatile long left_enc_pos = 0L;
 volatile long right_enc_pos = 0L;
 
+#define BASEMOTOR 0
+#define WRIST_INCLINATION 1
+#define WRIST_ROTATION 2
+#define GRIPPER 3
+
 // based on the valid states inside an encoder. NOTE: Will most likely need to be changed. each state is a 4 bit number
 // (16 combinations) and corresponds to a direction
 static const int8_t ENC_STATES[] = {0, 1, -1, 0, -1, 0, 0, 1, 1, 0, 0, -1, 0, -1, 1, 0};
 
+volatile long encoder_angles[] = {0L, 0L, 0L, 0L};
+
+static uint8_t enc_last[] = {0, 0, 0, 0};
 /* Interrupt routine for encoder, taking care of actual counting */
 void ISR(int addr)
 {
-  static uint8_t enc_last = 0;
+  // find the corresponding encoder pins
+  int encoder_pin_a, encoder_pin_b = -1;
+  switch (addr)
+  {
+  case BASEMOTOR:
+    encoder_pin_a = BASEMOTOR_ENC_A;
+    encoder_pin_b = BASEMOTOR_ENC_B;
+    break;
+  case WRIST_INCLINATION:
+    encoder_pin_a = WRIST_INCLINATION_ENC_A;
+    encoder_pin_b = WRIST_INCLINATION_ENC_B;
+    break;
+  case WRIST_ROTATION:
+    encoder_pin_a = WRIST_ROTATION_ENC_A;
+    encoder_pin_b = WRIST_ROTATION_ENC_B;
+    break;
+  case GRIPPER:
+    encoder_pin_a = GRIPPER_ENC_A;
+    encoder_pin_b = GRIPPER_ENC_B;
+    break;
+  default:
+    break;
+  }
 
-  enc_last <<= 2;                     // shift previous state two places
-  enc_last |= (PIND & (3 << 2)) >> 2; // read the current state into lowest 2 bits
+  enc_last[addr] <<= 2;                                                                           // shift previous state two places
+  enc_last[addr] = enc_last[addr] | digitalRead(encoder_pin_b) << 1 | digitalRead(encoder_pin_a); // read the current state into lowest 2 bits
 
-  left_enc_pos += ENC_STATES[(enc_last & 0x0f)];
+  encoder_angles[addr] += ENC_STATES[(enc_last[addr] & 0x0f)];
 }
 
 /* Wrap the encoder reading function */
-long readEncoder(int i)
+long readEncoder(int addr)
 {
-  if (i == LEFT)
-    return left_enc_pos;
-  else
-    return right_enc_pos;
+  return encoder_angles[addr];
 }
 
 /* Wrap the encoder reset function */
 void resetEncoder(int i)
 {
-  if (i == LEFT)
-  {
-    left_enc_pos = 0L;
-    return;
-  }
-  else
-  {
-    right_enc_pos = 0L;
-    return;
-  }
+  encoder_angles[i] = 0L;
 }
 
 /* Wrap the encoder reset function */
 void resetEncoders()
 {
-  resetEncoder(LEFT);
-  resetEncoder(RIGHT);
+  for (int i = 0; i < 4; i++)
+  {
+    resetEncoder(i);
+  }
 }
 
 inline void WRIST_INCLINATION_ISR()
