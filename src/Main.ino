@@ -56,11 +56,18 @@
 // ---------------------- INCLUDES ----------------------
 
 #include "Arduino.h"
+
+// macros
 #include "commands.h"
 #include "pinout.h"
-#include "sensors.h"
+
+// motor drivers
 #include "motor_driver.h"
 #include "encoder_driver.h"
+#include "linear_actuator_driver.h"
+#include "stepper_driver.h"
+
+#include "sensors.h"
 #include "pid_controller.h"
 
 /* Convert the rate into an interval */
@@ -86,7 +93,6 @@ char chr;
 // Variable to hold the current single-character command
 char cmd;
 // Character arrays to hold the first and second arguments
-// Could be replaced with a more elegant solution but im tired and this works
 char argv1[16];
 char argv2[16];
 // The arguments converted to integers
@@ -109,8 +115,6 @@ void resetCommand()
 /* Run a command.  Commands are defined in commands.h */
 int runCommand()
 {
-  Serial.print("Command: " + String(cmd) + " " + String(argv1) + " " + String(argv2) + "\n");
-
   int i = 0;
   char *p = argv1;
   char *str;
@@ -146,10 +150,7 @@ int runCommand()
     break;
 #endif
   case READ_ENCODER:
-    for (int i = 0; i < 4; i++)
-    {
-      Serial.print(String(readEncoder(i)) + " ");
-    }
+    Serial.println(readEncoder(arg1));
     break;
   case RESET_ENCODERS:
     resetEncoders();
@@ -158,6 +159,8 @@ int runCommand()
     break;
   case MOTOR_SPEEDS:
     /* Reset the auto stop timer */
+
+    //TODO update PID calculations to work with new drivers
     lastMotorCommand = millis();
     if (arg1 == 0 && arg2 == 0)
     {
@@ -315,7 +318,7 @@ void loop()
       }
     }
   }
-
+  // TODO update this code to work with the new drivers
   // If we are using base control, run a PID calculation at the appropriate intervals
   if (millis() > nextPID)
   {
@@ -329,4 +332,5 @@ void loop()
     setMotorSpeeds(0, 0);
     moving = 0;
   }
+  
 }
