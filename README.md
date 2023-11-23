@@ -33,13 +33,14 @@ This code is for the PJRC Teensy 4.1 development board. These instructions are t
 
 ## Roadmap
 
-- [ ] Brushless motor control
-- [ ] Encoder support
+- [x] Brushless motor control
+- [x] Custom pinout
+- [x] Potentiometer support
+  - [ ] Potentiometer calibration
+- [x] Encoder support
 - [ ] Stepper motor control
     - [ ] Speed control
 - [ ] Hardware addressing
-- [ ] Potentiometer support
-  - [ ] Potentiometer calibration
-- [ ] Custom pinout
-
-
+- [ ] Unit testing (lol probably not)
+- [ ] Documentation
+- [ ] Limit switch calibration (unnecessary if we switch to servos)
