@@ -1,3 +1,4 @@
+
 /* Define single-letter commands that will be sent by the PC over the
    serial link.
 */
@@ -5,22 +6,16 @@
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
-// Manual pin control. Do not use in production
-#define ANALOG_READ    'a'
-#define ANALOG_WRITE   'b'
-#define DIGITAL_READ   'c'
-#define DIGITAL_WRITE  'd'
-
 // Encoders
-#define READ_ENCODERS  'e'
-#define RESET_ENCODERS 'f'
+#define READ_ENCODER 'e' // e [encoder id]
+#define RESET_ENCODERS 'f' // f
 
 // Actuators
-#define ACTUATOR_SPEEDS 'g'
-#define ACTUATOR_RAW_THROTTLE 'h'
+#define ACTUATOR_SPEEDS 'g' // g [actuator id] [speed]
+#define ACTUATOR_RAW_THROTTLE 'h' // h [actuator id] [throttle]
 
 // actuator potentiometers
-#define ACTUATOR_POTENTIONMETER_READ 'i'
+#define READ_ACTUATOR_POTENTIOMETER 'i' // i  [actuator id]
 
 // Motors
 #define MOTOR_SPEEDS   'k'

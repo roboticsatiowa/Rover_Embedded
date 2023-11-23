@@ -14,30 +14,6 @@
 
 #define MAX_PWM 255
 
-// Sets enable pin high
-void initMotorController()
-{
-  pinMode(A0, INPUT);
-  pinMode(A1, INPUT);
-
-  pinMode(RIGHT_ENABLE, OUTPUT);
-  pinMode(LEFT_ENABLE, OUTPUT);
-
-  pinMode(RIGHT_DIR, OUTPUT);
-  pinMode(LEFT_DIR, OUTPUT);
-
-  pinMode(RIGHT_FWD_MOTOR, OUTPUT);
-  pinMode(RIGHT_MID_MOTOR, OUTPUT);
-  pinMode(RIGHT_BCK_MOTOR, OUTPUT);
-
-  pinMode(LEFT_FWD_MOTOR, OUTPUT);
-  pinMode(LEFT_MID_MOTOR, OUTPUT);
-  pinMode(LEFT_BCK_MOTOR, OUTPUT);
-
-  digitalWrite(RIGHT_ENABLE, HIGH);
-  digitalWrite(LEFT_ENABLE, HIGH);
-}
-
 void setMotorSpeed(int side, int spd)
 {
   unsigned char reverse = 0;
@@ -52,37 +28,17 @@ void setMotorSpeed(int side, int spd)
 
   if (side == LEFT)
   {
-    if (reverse == 0)
-    {
-      analogWrite(LEFT_FWD_MOTOR, spd);
-      analogWrite(LEFT_MID_MOTOR, spd);
-      analogWrite(LEFT_BCK_MOTOR, spd);
-      digitalWrite(LEFT_DIR, LOW);
-    }
-    else if (reverse == 1)
-    {
-      analogWrite(LEFT_FWD_MOTOR, spd);
-      analogWrite(LEFT_MID_MOTOR, spd);
-      analogWrite(LEFT_BCK_MOTOR, spd);
-      digitalWrite(LEFT_DIR, HIGH);
-    }
+    analogWrite(L_FWD_WHEEL_PUL, spd);
+    analogWrite(L_MID_WHEEL_PUL, spd);
+    analogWrite(L_BCK_WHEEL_PUL, spd);
+    digitalWrite(L_WHEEL_DIR, reverse);
   }
   else /*if (i == RIGHT) //no need for condition*/
   {
-    if (reverse == 0)
-    {
-      analogWrite(RIGHT_FWD_MOTOR, spd);
-      analogWrite(RIGHT_MID_MOTOR, spd);
-      analogWrite(RIGHT_BCK_MOTOR, spd);
-      digitalWrite(RIGHT_DIR, LOW);
-    }
-    else if (reverse == 1)
-    {
-      analogWrite(RIGHT_FWD_MOTOR, spd);
-      analogWrite(RIGHT_MID_MOTOR, spd);
-      analogWrite(RIGHT_BCK_MOTOR, spd);
-      digitalWrite(RIGHT_DIR, HIGH);
-    }
+    analogWrite(R_FWD_WHEEL_PUL, spd);
+    analogWrite(R_MID_WHEEL_PUL, spd);
+    analogWrite(R_BCK_WHEEL_PUL, spd);
+    digitalWrite(R_WHEEL_DIR, reverse);
   }
 }
 
