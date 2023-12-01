@@ -17,12 +17,10 @@
 volatile long left_enc_pos = 0L;
 volatile long right_enc_pos = 0L;
 
-const BASEMOTOR = 0
-const WRIST_INCLINATION = 1
-const WRIST_ROTATION = 2
-const GRIPPER = 3
-
-const double degrees_per_tick = 4.5;
+const uint BASEMOTOR = 0;
+const uint WRIST_INCLINATION = 1;
+const uint WRIST_ROTATION = 2;
+const uint GRIPPER = 3;
 
 // based on the valid states inside an encoder. each state is a 4 bit number (2 bits previous state + 2 bits current state)
 // (16 combinations) and corresponds to a direction
@@ -67,7 +65,7 @@ void ISR(int addr)
 /* Wrap the encoder reading function */
 long readEncoder(int addr)
 {
-  return encoder_angles[addr] * degrees_per_tick; // 4.5 degrees per encoder tick
+  return encoder_angles[addr]
 }
 
 /* Wrap the encoder reset function */

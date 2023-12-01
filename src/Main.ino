@@ -78,7 +78,7 @@ unsigned long nextPID = PID_INTERVAL;
 
 /* Stop the robot if it hasn't received a movement command
  in this number of milliseconds */
-#define AUTO_STOP_INTERVAL 2000
+#define AUTO_STOP_INTERVAL 10000
 long lastMotorCommand = AUTO_STOP_INTERVAL;
 
 /* Variable initialization */
@@ -208,7 +208,7 @@ void setup()
   Serial.begin(BAUDRATE);
 
   // initialize linear actuator serial port
-  LINEAR_ACTUATOR_SERIAL.begin(9700);
+  init_linear_actuator_controller();
 
   // initialize stepper encoder pins as inputs
   pinMode(BASEMOTOR_ENC_A, INPUT_PULLUP);
