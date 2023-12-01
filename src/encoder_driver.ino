@@ -65,7 +65,7 @@ void ISR(int addr)
 /* Wrap the encoder reading function */
 long readEncoder(int addr)
 {
-  return encoder_angles[addr]
+  return encoder_angles[addr];
 }
 
 /* Wrap the encoder reset function */

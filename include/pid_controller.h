@@ -111,7 +111,6 @@ void doPID(SetPointInfo *p)
 /* Read the encoder values and call the PID routine */
 void updatePID()
 {
-  /* Read the encoders */a change val to actual encoder pin
   rightPID.Encoder = readEncoder(3); //TODO change val to actual encoder pin
 
   /* If we're not moving there is nothing more to do */
