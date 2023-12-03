@@ -197,6 +197,24 @@ int runCommand()
   default:
     Serial.println("Invalid Command");
     break;
+  case ACTUATOR_RAW_THROTTLE:
+    //send baud rate first
+
+    if (arg1 == 0 && arg2 == 0)
+    {
+      set_linear_actuator_speed(0, 0);
+      //resetPID();
+      //moving = 0;
+    }
+    else
+    {
+      moving = 1;
+      set_linear_actuator_speed(arg1,arg2);
+      leftPID.TargetTicksPerFrame = arg1;
+      rightPID.TargetTicksPerFrame = arg2;
+    }
+    Serial.println("OK");
+    break;
   }
 
   return 0;
@@ -326,4 +344,7 @@ void loop()
     moving = 0;
   }
     setStepperSpeed(3, analogRead(SHOULDER_POTENTIOMETER) / 4);
+
+  
+
 }
