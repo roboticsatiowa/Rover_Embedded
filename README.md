@@ -45,3 +45,8 @@ This code is for the PJRC Teensy 4.1 development board. These instructions are t
 - [ ] Servo support
 - [ ] Independent wheel motor control
 - [ ] Limit switch calibration (unnecessary if we switch to servos)
+- [ ] PID control
+
+## Pin assignment chart
+
+![Pinout](images/pinout.jpeg)

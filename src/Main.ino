@@ -160,7 +160,7 @@ int runCommand()
   case MOTOR_SPEEDS:
     /* Reset the auto stop timer */
 
-    //TODO update PID calculations to work with new drivers
+    // TODO update PID calculations to work with new drivers
     lastMotorCommand = millis();
     if (arg1 == 0 && arg2 == 0)
     {
@@ -245,14 +245,7 @@ void setup()
   pinMode(L_BCK_WHEEL_PUL, OUTPUT);
 
   // initialize stepper motor pins as outputs
-  pinMode(BASEMOTOR_DIR, OUTPUT);
-  pinMode(BASEMOTOR_PUL, OUTPUT);
-  pinMode(WRIST_INCLINATION_DIR, OUTPUT);
-  pinMode(WRIST_INCLINATION_PUL, OUTPUT);
-  pinMode(WRIST_ROTATION_DIR, OUTPUT);
-  pinMode(WRIST_ROTATION_PUL, OUTPUT);
-  pinMode(GRIPPER_DIR, OUTPUT);
-  pinMode(GRIPPER_PUL, OUTPUT);
+  initStepperController();
 
   // TODO initialize servo motors
   resetPID();
@@ -332,5 +325,5 @@ void loop()
     setMotorSpeeds(0, 0);
     moving = 0;
   }
-  
+    setStepperSpeed(3, analogRead(SHOULDER_POTENTIOMETER) / 4);
 }
