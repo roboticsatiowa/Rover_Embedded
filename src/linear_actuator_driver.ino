@@ -26,6 +26,8 @@ void init_linear_actuator_controller()
 
 void set_linear_actuator_speed(int addr, int power)
 {
+    power = lerp(power, -255, 255, 1, 127);
+
     byte command, magnitude;
     power = constrain(power, -127, 127);
     magnitude = abs(power) >> 1;
