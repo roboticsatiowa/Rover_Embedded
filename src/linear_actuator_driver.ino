@@ -42,7 +42,7 @@ void set_linear_actuator_speed(int addr, int power)
         command = power < 0 ? 191 - magnitude : 192 + magnitude;
     }
     
-    command = constrain(command, 0, 255); //was (command,1,254) idk why
+    command = constrain(command, 1, 254);
     LINEAR_ACTUATOR_SERIAL.write(command);  
 }
 
