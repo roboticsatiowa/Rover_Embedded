@@ -198,21 +198,10 @@ int runCommand()
     Serial.println("Invalid Command");
     break;
   case ACTUATOR_RAW_THROTTLE:
-    //send baud rate first
-
-    if (arg1 == 0 && arg2 == 0)
-    {
-      set_linear_actuator_speed(0, 0);
-      //resetPID();
-      //moving = 0;
-    }
-    else
-    {
-      moving = 1;
-      set_linear_actuator_speed(arg1,arg2);
-      leftPID.TargetTicksPerFrame = arg1;
-      rightPID.TargetTicksPerFrame = arg2;
-    }
+    output_high();
+    set_linear_actuator_speed(arg1,arg2);
+    delay(50); //atleast 50 us
+    output_low();
     Serial.println("OK");
     break;
   }
