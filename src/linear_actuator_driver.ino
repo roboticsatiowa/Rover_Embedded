@@ -50,7 +50,7 @@ void set_linear_actuator_speed(int addr, int power)
     LINEAR_ACTUATOR_SERIAL.write(b);  
 }
 
-//send signal to differentiate between sabertooths, sending to s2 pin like "I AM SPEAKING TO U"
+//send signal to differentiate between saberteeths, sending to s2 pin like "I AM SPEAKING TO U"
 void output_high()
 {
     digitalWrite(LINEAR_ACTUATOR_SERIAL, HIGH);

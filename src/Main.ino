@@ -149,6 +149,10 @@ int runCommand()
     Serial.println(servos[arg1].getServo().read());
     break;
 #endif
+  case STEPPER_RAW_DUTYCYCLE:
+    setStepperSpeed(arg1, arg2);
+    Serial.println("OK");
+    break;
   case READ_ENCODER:
     Serial.println(readEncoder(arg1));
     break;
@@ -333,8 +337,4 @@ void loop()
     setMotorSpeeds(0, 0);
     moving = 0;
   }
-    setStepperSpeed(3, analogRead(SHOULDER_POTENTIOMETER) / 4);
-
-  
-
 }

@@ -35,17 +35,18 @@ This code is for the PJRC Teensy 4.1 development board. These instructions are t
 
 - [x] Brushless motor control
 - [x] Custom pinout
-- [x] Potentiometer support
-  - [ ] Potentiometer calibration
-- [x] Encoder support
-- [ ] Stepper motor control
-    - [ ] Speed control
+- [x] Sequential encoder support
+- [x] Stepper motor control
+    - [x] Speed control
+- [ ] Linear actuator control
+    - [ ] actuator angle calculation
 - [ ] Hardware addressing
-- [ ] Unit testing (lol probably not)
-- [ ] Servo support
+- [ ] Unit testing
+    - [ ] QEMU hardware simulation
 - [ ] Independent wheel motor control
-- [ ] Limit switch calibration (unnecessary if we switch to servos)
-- [ ] PID control
+- [ ] PID position control
+- [ ] PID velocity control
+- [ ] ROS integration
 
 ## Pin assignment chart
 
