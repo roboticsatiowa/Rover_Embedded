@@ -26,26 +26,28 @@ void init_linear_actuator_controller()
 
 void set_linear_actuator_speed(int addr, int power)
 {
-    power = lerp(power, -255, 255, 1, 127);
+    //power = lerp(power, -255, 255, 1, 127);
 
+/*
     byte command, magnitude;
     power = constrain(power, -127, 127);
     magnitude = abs(power) >> 1;
     
     //commands 0 - 127 runs motor 1, 64 stop
-    if (addr == 1)
+    if (addr == 0)
     {
         command = power < 0 ? 63 - magnitude : 64 + magnitude;
     }
 
     //commands 128-255 runs motor 2, 192 stop
-    else if (addr == 2)
+    else if (addr == 1)
     {
         command = power < 0 ? 191 - magnitude : 192 + magnitude;
     }
-    
-    command = constrain(command, 1, 254);
-    LINEAR_ACTUATOR_SERIAL.write(command);  
+*/
+    //command = constrain(command, 1, 254);
+    int8_t b = power;  
+    LINEAR_ACTUATOR_SERIAL.write(b);  
 }
 
 //send signal to differentiate between sabertooths, sending to s2 pin like "I AM SPEAKING TO U"

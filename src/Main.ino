@@ -198,11 +198,12 @@ int runCommand()
     Serial.println("Invalid Command");
     break;
   case ACTUATOR_RAW_THROTTLE:
-    output_high();
+    //output_high();
+    init_linear_actuator_controller();
     set_linear_actuator_speed(arg1,arg2);
-    delay(50); //atleast 50 us
-    output_low();
-    Serial.println("OK");
+    //delay(50); //atleast 50 us
+    //output_low();
+    Serial.println("OKIE");
     break;
   }
 
