@@ -6,19 +6,19 @@ int lerp(int x, int a1, int b1, int a2, int b2)
     return a2 + (x - a1) * (b2 - a2) / (b1 - a1);
 }
 
-/*
+
 void init_linear_actuator_controller()
 {
-    LINEAR_ACTUATOR_SERIAL.begin(9700);
+    LINEAR_ACTUATOR_SERIAL.begin(9600);
 }
 
 void set_linear_actuator_speed(int addr, int velocity)
 {
-    LINEAR_ACTUATOR_SERIAL.write(addr << 7 | lerp(velocity, -255, 255, 1, 127)); //first bit is address, rest is velocity
+   //LINEAR_ACTUATOR_SERIAL.write(velocity);
+   LINEAR_ACTUATOR_SERIAL.write(addr << 7 | lerp(velocity, -255, 255, 1, 127)); //first bit is address, rest is velocity
 }
-*/
-//idk
 
+/*
 void init_linear_actuator_controller()
 {
     LINEAR_ACTUATOR_SERIAL.begin(9600);
@@ -26,9 +26,9 @@ void init_linear_actuator_controller()
 
 void set_linear_actuator_speed(int addr, int power)
 {
-    //power = lerp(power, -255, 255, 1, 127);
+    power = lerp(power, -255, 255, 1, 127);
 
-/*
+
     byte command, magnitude;
     power = constrain(power, -127, 127);
     magnitude = abs(power) >> 1;
@@ -44,20 +44,9 @@ void set_linear_actuator_speed(int addr, int power)
     {
         command = power < 0 ? 191 - magnitude : 192 + magnitude;
     }
-*/
+
     //command = constrain(command, 1, 254);
     int8_t b = power;  
     LINEAR_ACTUATOR_SERIAL.write(b);  
 }
-
-//send signal to differentiate between saberteeths, sending to s2 pin like "I AM SPEAKING TO U"
-void output_high()
-{
-    digitalWrite(LINEAR_ACTUATOR_SERIAL, HIGH);
-}
-
-void output_low()
-{
-    digitalWrite(LINEAR_ACTUATOR_SERIAL, LOW);
-}
-
+*/
