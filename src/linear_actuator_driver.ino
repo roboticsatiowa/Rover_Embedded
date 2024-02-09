@@ -46,7 +46,7 @@ void set_linear_actuator_speed(int addr, int power)
     }
 
     //command = constrain(command, 1, 254);
-    int8_t b = power;  
+    int8_t b = command;  
     LINEAR_ACTUATOR_SERIAL.write(b);  
 }
 
