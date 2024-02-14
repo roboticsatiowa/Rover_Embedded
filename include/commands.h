@@ -30,6 +30,7 @@
 #define PIN_MODE       'q'
 #define PING           'r'
 #define UPDATE_PID     's'
+#define HEADLIGHT_CONTROL 'z'
 
 // *Not Commands*
 #define LEFT            0
