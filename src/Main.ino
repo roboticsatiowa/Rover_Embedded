@@ -98,6 +98,8 @@ char argv2[16];
 // The arguments converted to integers
 long arg1;
 long arg2;
+// Headlight global
+int headlight_state = 0;
 
 /* Clear the current command parameters */
 void resetCommand()
@@ -208,7 +210,12 @@ int runCommand()
     output_low();
     Serial.println("OK");
     break;
+  case HEADLIGHT_CONTROL:
+    digitalWrite(HEADLIGHT, !headlight_state);
+    headlight_state = !headlight_state;
+    Serial.println("OK");
   }
+
 
   return 0;
 }
@@ -254,6 +261,9 @@ void setup()
   pinMode(L_FWD_WHEEL_PUL, OUTPUT);
   pinMode(L_MID_WHEEL_PUL, OUTPUT);
   pinMode(L_BCK_WHEEL_PUL, OUTPUT);
+
+  // initialize headlight pin as output
+  pinMode(HEADLIGHT, OUTPUT);
 
   // initialize stepper motor pins as outputs
   initStepperController();
