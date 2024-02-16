@@ -208,6 +208,19 @@ int runCommand()
     output_low();
     Serial.println("OK");
     break;
+  case DISABLE_PINS: 
+    CORE_PIN20_CONFIG = 0; 
+    CORE_PIN19_CONFIG = 0; 
+    CORE_PIN16_CONFIG = 0; 
+    CORE_PIN15_CONFIG = 0; 
+    CORE_PIN38_CONFIG = 0; 
+    CORE_PIN37_CONFIG = 0; 
+    CORE_PIN34_CONFIG = 0; 
+    CORE_PIN33_CONFIG = 0; 
+    CORE_PIN29_CONFIG = 0; 
+    CORE_PIN28_CONFIG = 0;
+    // FIX - DISABLE ALL PINS IN USE BESIDES STEPPER MOTOR PINS
+    Serial.println("DISABLE"); 
   }
 
   return 0;
@@ -273,6 +286,7 @@ void setup()
 */
 void loop()
 {
+
   while (Serial.available() > 0)
   {
     // Read the next character
@@ -336,12 +350,36 @@ void loop()
     setMotorSpeeds(0, 0);
     moving = 0;
   }
-<<<<<<< HEAD
-    setStepperSpeed(3, analogRead(SHOULDER_POTENTIOMETER) / 4);
 
-  
 
-=======
-    // setStepperSpeed(3, analogRead(SHOULDER_POTENTIOMETER) / 4);
->>>>>>> 32772d9 (Add support for setting stepper motor speed with)
+  int interval = 1000; 
+  int secondsToReset = 10000; 
+  int millisecondsPassed = 0; 
+
+  while (millisecondsPassed < secondsToReset) { 
+    millisecondsPassed += interval; 
+  }
+
+  if (millisecondsPassed > secondsToReset) { 
+    millisecondsPassed = 0; 
+    disablePins(); 
+  }
+
+
+  // shut off pins / set to 0 
+  // reset timer 
+}
+
+void disablePins() { 
+    CORE_PIN20_CONFIG = 0; 
+    CORE_PIN19_CONFIG = 0; 
+    CORE_PIN16_CONFIG = 0; 
+    CORE_PIN15_CONFIG = 0; 
+    CORE_PIN38_CONFIG = 0; 
+    CORE_PIN37_CONFIG = 0; 
+    CORE_PIN34_CONFIG = 0; 
+    CORE_PIN33_CONFIG = 0; 
+
+    // FIX - DISABLE ALL PINS IN USE BESIDES STEPPER MOTOR PINS
+    Serial.println("DISABLE"); 
 }

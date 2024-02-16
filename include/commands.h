@@ -31,6 +31,12 @@
 #define PING           'r'
 #define UPDATE_PID     's'
 
+// disable pins 
+#define DISABLE_PINS 'd'
+
+// serial port disconnected 
+#define SERIAL_DISCONNECTED 'g'
+
 // *Not Commands*
 #define LEFT            0
 #define RIGHT           1
