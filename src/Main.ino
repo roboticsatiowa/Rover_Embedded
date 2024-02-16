@@ -48,7 +48,7 @@
 // ---------------------- DEFINES ----------------------
 
 /* Serial port baud rate */
-#define BAUDRATE 57600
+#define BAUDRATE 115200
 
 /* Run the PID loop at 30 times per second */
 #define PID_RATE 30 // Hz
@@ -98,6 +98,8 @@ char argv2[16];
 // The arguments converted to integers
 long arg1;
 long arg2;
+// Headlight global
+int headlight_state = 0;
 
 /* Clear the current command parameters */
 void resetCommand()
@@ -216,7 +218,12 @@ int runCommand()
     CORE_PIN34_CONFIG = 0;
     CORE_PIN33_CONFIG = 0;
     Serial.println("DISABLE");
+  case HEADLIGHT_CONTROL:
+    digitalWrite(HEADLIGHT, !headlight_state);
+    headlight_state = !headlight_state;
+    Serial.println("OK");
   }
+
 
   return 0;
 }
@@ -262,6 +269,9 @@ void setup()
   pinMode(L_FWD_WHEEL_PUL, OUTPUT);
   pinMode(L_MID_WHEEL_PUL, OUTPUT);
   pinMode(L_BCK_WHEEL_PUL, OUTPUT);
+
+  // initialize headlight pin as output
+  pinMode(HEADLIGHT, OUTPUT);
 
   // initialize stepper motor pins as outputs
   initStepperController();
@@ -344,7 +354,6 @@ void loop()
     setMotorSpeeds(0, 0);
     moving = 0;
   }
-
 int interval = 10000;
 int previousMills = 0;
 while (millis() - previousMills > interval) {

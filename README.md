@@ -21,7 +21,7 @@ This code is for the PJRC Teensy 4.1 development board. These instructions are t
 
 - VS Code Installed
 - [PlatformIO](https://platformio.org/platformio-ide) Installed
-- [Arduino CLI](https://www.arduino.cc/en/software)  Installed
+- [Arduino CLI](https://www.arduino.cc/en/software)  Installed `sudo apt install teensy-loader-cli`
 - Teensy 4.1 microcontroller plugged into USB
 
 ### Installing
@@ -30,6 +30,9 @@ This code is for the PJRC Teensy 4.1 development board. These instructions are t
 2. Open the cloned folder in VS Code
 3. Upload software to board using the PlatformIO plugin
 
+### Troubleshooting
+
+Make sure that the serial monitor is configured to the correct baud rate (9600) and that the line ending is set to "CR"
 
 ## Roadmap
 
