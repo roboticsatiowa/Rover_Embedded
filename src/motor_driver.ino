@@ -23,9 +23,10 @@ void setMotorSpeed(int side, int spd)
     spd = -spd;
     reverse = 1;
   }
-  if (spd > MAX_PWM)
+  if (spd > MAX_PWM) 
+  {
     spd = MAX_PWM;
-
+  }
   if (side == LEFT)
   {
     analogWrite(L_FWD_WHEEL_PUL, spd);

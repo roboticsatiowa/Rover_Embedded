@@ -12,8 +12,6 @@ void initStepperController()
     pinMode(WRIST_ROTATION_PUL, OUTPUT);
     pinMode(GRIPPER_DIR, OUTPUT);
     pinMode(GRIPPER_PUL, OUTPUT);
-
-    analogWrite(33, 128);
 }
 
 void setStepperSpeed(int i, int spd)

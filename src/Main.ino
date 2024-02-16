@@ -204,12 +204,20 @@ int runCommand()
     Serial.println("Invalid Command");
     break;
   case ACTUATOR_RAW_THROTTLE:
-    output_high();
+    init_linear_actuator_controller();
     set_linear_actuator_speed(arg1,arg2);
-    delay(50); //atleast 50 us
-    output_low();
-    Serial.println("OK");
+    Serial.println("OKIE");
     break;
+  case DISABLE_PINS:
+    CORE_PIN20_CONFIG = 0;
+    CORE_PIN19_CONFIG = 0;
+    CORE_PIN16_CONFIG = 0;
+    CORE_PIN15_CONFIG = 0;
+    CORE_PIN38_CONFIG = 0;
+    CORE_PIN37_CONFIG = 0;
+    CORE_PIN34_CONFIG = 0;
+    CORE_PIN33_CONFIG = 0;
+    Serial.println("DISABLE");
   case HEADLIGHT_CONTROL:
     digitalWrite(HEADLIGHT, !headlight_state);
     headlight_state = !headlight_state;
@@ -346,5 +354,10 @@ void loop()
     setMotorSpeeds(0, 0);
     moving = 0;
   }
-    // setStepperSpeed(3, analogRead(SHOULDER_POTENTIOMETER) / 4);
+int interval = 10000;
+int previousMills = 0;
+while (millis() - previousMills > interval) {
+  previousMills += interval;
+}
+
 }
