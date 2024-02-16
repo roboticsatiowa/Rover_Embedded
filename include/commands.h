@@ -30,6 +30,13 @@
 #define PIN_MODE       'q'
 #define PING           'r'
 #define UPDATE_PID     's'
+#define HEADLIGHT_CONTROL 'z'
+
+//disable pins
+#define DISABLE_PINS 'd'
+
+//serial port disconnected
+#define SERIAL_DISCONNECTED 'g'
 
 // disable pins 
 #define DISABLE_PINS 'd'

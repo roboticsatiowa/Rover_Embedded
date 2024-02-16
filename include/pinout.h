@@ -51,5 +51,6 @@
 // ---------------- Misc Pin Assignments ----------------
 
 #define STATUS_LED 13
+#define HEADLIGHT 9
 
 #endif

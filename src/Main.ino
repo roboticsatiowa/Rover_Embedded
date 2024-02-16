@@ -48,7 +48,7 @@
 // ---------------------- DEFINES ----------------------
 
 /* Serial port baud rate */
-#define BAUDRATE 57600
+#define BAUDRATE 115200
 
 /* Run the PID loop at 30 times per second */
 #define PID_RATE 30 // Hz
@@ -98,6 +98,8 @@ char argv2[16];
 // The arguments converted to integers
 long arg1;
 long arg2;
+// Headlight global
+int headlight_state = 0;
 
 /* Clear the current command parameters */
 void resetCommand()
@@ -202,12 +204,11 @@ int runCommand()
     Serial.println("Invalid Command");
     break;
   case ACTUATOR_RAW_THROTTLE:
-    output_high();
+    init_linear_actuator_controller();
     set_linear_actuator_speed(arg1,arg2);
-    delay(50); //atleast 50 us
-    output_low();
-    Serial.println("OK");
+    Serial.println("OKIE");
     break;
+<<<<<<< HEAD
   case DISABLE_PINS: 
     CORE_PIN20_CONFIG = 0; 
     CORE_PIN19_CONFIG = 0; 
@@ -221,7 +222,24 @@ int runCommand()
     CORE_PIN28_CONFIG = 0;
     // FIX - DISABLE ALL PINS IN USE BESIDES STEPPER MOTOR PINS
     Serial.println("DISABLE"); 
+=======
+  case DISABLE_PINS:
+    CORE_PIN20_CONFIG = 0;
+    CORE_PIN19_CONFIG = 0;
+    CORE_PIN16_CONFIG = 0;
+    CORE_PIN15_CONFIG = 0;
+    CORE_PIN38_CONFIG = 0;
+    CORE_PIN37_CONFIG = 0;
+    CORE_PIN34_CONFIG = 0;
+    CORE_PIN33_CONFIG = 0;
+    Serial.println("DISABLE");
+  case HEADLIGHT_CONTROL:
+    digitalWrite(HEADLIGHT, !headlight_state);
+    headlight_state = !headlight_state;
+    Serial.println("OK");
+>>>>>>> 3007de723e67804231060a26f3ec1cb0a32ffa2c
   }
+
 
   return 0;
 }
@@ -267,6 +285,9 @@ void setup()
   pinMode(L_FWD_WHEEL_PUL, OUTPUT);
   pinMode(L_MID_WHEEL_PUL, OUTPUT);
   pinMode(L_BCK_WHEEL_PUL, OUTPUT);
+
+  // initialize headlight pin as output
+  pinMode(HEADLIGHT, OUTPUT);
 
   // initialize stepper motor pins as outputs
   initStepperController();
@@ -350,6 +371,7 @@ void loop()
     setMotorSpeeds(0, 0);
     moving = 0;
   }
+<<<<<<< HEAD
 
 
   int interval = 1000; 
@@ -382,4 +404,12 @@ void disablePins() {
 
     // FIX - DISABLE ALL PINS IN USE BESIDES STEPPER MOTOR PINS
     Serial.println("DISABLE"); 
+=======
+int interval = 10000;
+int previousMills = 0;
+while (millis() - previousMills > interval) {
+  previousMills += interval;
+}
+
+>>>>>>> 3007de723e67804231060a26f3ec1cb0a32ffa2c
 }
