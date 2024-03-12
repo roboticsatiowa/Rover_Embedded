@@ -42,15 +42,16 @@ Make sure that the serial monitor is configured to the correct baud rate (9600) 
 - [x] Sequential encoder support
 - [x] Stepper motor control
     - [x] Speed control
-- [ ] Linear actuator control
+- [x] Linear actuator control
     - [ ] actuator angle calculation
-- [ ] Hardware addressing
+- [x] Hardware addressing
+- [x] ROS integration
+- [x] Headlight control
 - [ ] Unit testing
     - [ ] QEMU hardware simulation
 - [ ] Independent wheel motor control
 - [ ] PID position control
 - [ ] PID velocity control
-- [ ] ROS integration
 
 ## Pin assignment chart
 

@@ -38,12 +38,6 @@
 //serial port disconnected
 #define SERIAL_DISCONNECTED 'g'
 
-// disable pins 
-#define DISABLE_PINS 'd'
-
-// serial port disconnected 
-#define SERIAL_DISCONNECTED 'g'
-
 #define WARNING_LIGHT 'w'
 
 
