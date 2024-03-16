@@ -53,6 +53,8 @@ Make sure that the serial monitor is configured to the correct baud rate (9600) 
 - [ ] PID position control
 - [ ] PID velocity control
 
+Unit testing is a long term goal however currently there are no viable solutions to emulate a teensy 4.1. We could potentially use actual hardware for automated testing but this would be a significant investment of time and resources.
+
 ## Pin assignment chart
 
 ![Pinout](images/pinout.jpeg)

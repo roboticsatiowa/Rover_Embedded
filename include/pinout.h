@@ -45,8 +45,8 @@
 
 // ---------------- Potentiometer Pin Assignments ----------------
 
-#define SHOULDER_POTENTIOMETER A12
-#define ELBOW_POTENTIOMETER A13
+#define SHOULDER_POTENTIOMETER PIN_A12
+#define ELBOW_POTENTIOMETER PIN_A13
 
 // ---------------- Misc Pin Assignments ----------------
 
