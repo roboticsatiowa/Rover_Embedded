@@ -1,5 +1,4 @@
 #include "Arduino.h"
-
 // macros
 #include "commands.h"
 #include "pinout.h"
@@ -10,38 +9,17 @@
 #include "linear_actuator_driver.h"
 #include "stepper_driver.h"
 
-#include "pid_controller.h"
-
 // ---------------------- CONSTANTS ----------------------
 
-#define BAUDRATE 115200          // Teensy <---> Jetson
-#define PID_RATE 30              // Hz
-#define AUTO_STOP_INTERVAL 10000 // milliseconds
-const int PID_INTERVAL = 1000 / PID_RATE; // milliseconds
+#define BAUDRATE 115200           // Teensy <---> Jetson
+#define AUTO_STOP_INTERVAL 10000  // milliseconds   
 
 // ---------------------- VARIABLES ----------------------
 // this is pretty shit practice we should get rid of these
 // lots of global variables = bad
 
-
-unsigned long nextPID = PID_INTERVAL;
 long lastMotorCommand = AUTO_STOP_INTERVAL;
 
-// A pair of varibles to help parse serial commands (thanks Fergs)
-int arg = 0;
-int arg_index = 0;
-
-char chr; // Variable to hold an input character
-char cmd; // Variable to hold the current single-character command
-
-// Character arrays to hold the first and second arguments
-// bruh memory safety doesnt exist i guess
-char argv1[16];
-char argv2[16];
-
-// The arguments converted to integers
-long arg1;
-long arg2;
 // Headlight global
 int headlight_state = 0;
 
@@ -50,120 +28,112 @@ int showWarning = 1;
 
 // ---------------------- END GLOBAL VARIABLES ----------------------
 
-/* Clear the current command parameters */
-void resetCommand() {
-  cmd = '\0';
-  memset(argv1, 0, sizeof(argv1));
-  memset(argv2, 0, sizeof(argv2));
-
-  arg1 = 0;
-  arg2 = 0;
-  arg = 0;
-  arg_index = 0;
-}
 
 /* Run a command.  Commands are defined in commands.h */
 // this doesnt seem right
-int runCommand() {
-  int i = 0;
-  char* p = argv1;
-  char* str;
-  int pid_args[4];
-  arg1 = atoi(argv1);
-  arg2 = atoi(argv2);
+int runCommand(char cmd, String args[], int numArgs) {
 
   switch (cmd) {
-  case READ_ACTUATOR_POTENTIOMETER:
-    Serial.print(String(analogRead(SHOULDER_POTENTIOMETER)) + " " + String(analogRead(ELBOW_POTENTIOMETER)));
-    break;
+    case READ_ACTUATOR_POTENTIOMETER:
+      Serial.print(String(analogRead(SHOULDER_POTENTIOMETER)) + " " + String(analogRead(ELBOW_POTENTIOMETER)));
+      break;
 
-  case STEPPER_RAW:
-    setStepperSpeed(arg1, arg2);
-    Serial.println("OK");
-    break;
+    case STEPPER_RAW:
+      setStepperSpeed(args[0].toInt(), args[1].toInt());
+      Serial.println("OK");
+      break;
 
-  case READ_ENCODER:
-    Serial.println(readEncoder(arg1));
-    break;
+    case READ_ENCODER:
+      Serial.println(readEncoder(args[0].toInt()));
+      break;
 
-  case RESET_ENCODERS:
-    resetAllEncoders();
-    resetPID();
-    Serial.println("OK");
-    break;
+    case RESET_ENCODERS:
+      resetAllEncoders();
+      break;
 
-  case MOTOR_SPEEDS:
-    /* Reset the auto stop timer */
+    case MOTOR_RAW:
+      lastMotorCommand = millis();
+      setMotorSpeed(0, args[0].toInt(), args[1].toInt());
+      setMotorSpeed(1, args[0].toInt(), args[1].toInt());
+      setMotorSpeed(2, args[0].toInt(), args[1].toInt());
+      Serial.println(String(args[0].toInt()) + " " + String(args[1].toInt()));
+      break;
 
-    // TODO update PID calculations to work with new drivers
-    lastMotorCommand = millis();
-    if (arg1 == 0 && arg2 == 0) {
-      setMotorSpeeds(0, 0);
-      resetPID();
-      moving = 0;
-    }
-    else
-      moving = 1;
-    leftPID.TargetTicksPerFrame = arg1;
-    rightPID.TargetTicksPerFrame = arg2;
-    Serial.println("OK");
-    break;
+    case ACTUATOR_RAW:
+      init_linear_actuator_controller();
+      set_linear_actuator_speed(args[0].toInt(), args[1].toInt());
+      break;
 
-  case MOTOR_RAW:
-    /* Reset the auto stop timer */
-    lastMotorCommand = millis();
-    resetPID();
-    moving = 0; // Sneaky way to temporarily disable the PID
-    setMotorSpeeds(arg1, arg2);
-    Serial.println("OK");
-    break;
+    case DISABLE_PINS:
+      CORE_PIN20_CONFIG = 0;
+      CORE_PIN19_CONFIG = 0;
+      CORE_PIN16_CONFIG = 0;
+      CORE_PIN15_CONFIG = 0;
+      CORE_PIN38_CONFIG = 0;
+      CORE_PIN37_CONFIG = 0;
+      CORE_PIN34_CONFIG = 0;
+      CORE_PIN33_CONFIG = 0;
+      Serial.println("DISABLE");
+      break;
 
-  case UPDATE_PID:
-    while (*(str = strtok_r(p, ":", &p)) != '\0') {
-      pid_args[i] = atoi(str);
-      i++;
-    }
-    Kp = pid_args[0];
-    Kd = pid_args[1];
-    Ki = pid_args[2];
-    Ko = pid_args[3];
-    Serial.println("OK");
-    break;
+    case HEADLIGHT_CONTROL:
+      digitalWrite(HEADLIGHT, !headlight_state);
+      headlight_state = !headlight_state;
+      Serial.println("OK");
+      break;
 
-  case ACTUATOR_RAW:
-    init_linear_actuator_controller();
-    set_linear_actuator_speed(arg1, arg2);
-    Serial.println("OKIE");
-    break;
-
-  case DISABLE_PINS:
-    CORE_PIN20_CONFIG = 0;
-    CORE_PIN19_CONFIG = 0;
-    CORE_PIN16_CONFIG = 0;
-    CORE_PIN15_CONFIG = 0;
-    CORE_PIN38_CONFIG = 0;
-    CORE_PIN37_CONFIG = 0;
-    CORE_PIN34_CONFIG = 0;
-    CORE_PIN33_CONFIG = 0;
-    Serial.println("DISABLE");
-    break;
-
-  case HEADLIGHT_CONTROL:
-    digitalWrite(HEADLIGHT, !headlight_state);
-    headlight_state = !headlight_state;
-    Serial.println("OK");
-    break;
-
-  case WARNING_LIGHT:
-    // warningLight();
-    Serial.println("OK");
-    break;
-  default:
-    Serial.println("Invalid Command");
-    break;
+    case WARNING_LIGHT:
+      // warningLight();
+      Serial.println("OK");
+      break;
+    default:
+      Serial.println("Invalid Command");
+      break;
   }
 
   return 0;
+}
+
+void parseSerial() {
+
+  char cmd = ' ';
+
+  String args[4];
+  for (int i = 0; i < 4; i++) {
+    args[i] = "";
+  }
+
+  int argNum = 0;
+  
+  while (Serial.available() > 0) {
+
+    char chr = Serial.read();
+
+    // Terminate command with a carriage return (CR)
+    if (chr == '\r') {
+      if (cmd == ' ') {
+
+        continue;
+      }
+      runCommand(cmd, args, argNum);
+      continue;
+    }
+
+    // Use spaces to delimit parts of the command
+    if (chr == ' ') {
+      argNum++;
+      continue;
+    }
+
+    // Store the command character
+    if (argNum == 0) {
+      cmd = chr;
+      continue;
+    }
+
+    // Store the argument characters
+    args[argNum - 1] += chr;
+  }
 }
 
 /* Setup function--runs once at startup. */
@@ -208,126 +178,32 @@ void setup() {
   pinMode(L_MID_WHEEL_PUL, OUTPUT);
   pinMode(L_BCK_WHEEL_PUL, OUTPUT);
 
+  initMotorControllers();
+
+  //led pin
+  pinMode(13, OUTPUT);
+
   // initialize headlight pin as output
   pinMode(HEADLIGHT, OUTPUT);
 
   // initialize stepper motor pins as outputs
   initStepperController();
 
-  // TODO initialize servo motors
-  resetPID();
-
-  delay(5); // give some time for setup (5 milliseconds - shouldn't make a perceptible difference)
-
+  delay(50); // wait for the motor controllers to initialize
   pinMode(GLOBAL_ENABLE, OUTPUT);
   digitalWrite(GLOBAL_ENABLE, HIGH);
-
-  pinMode(8, OUTPUT);
 }
 
-/* Enter the main loop.  Read and parse input from the serial port
-   and run any valid commands. Run a PID calculation at the target
-   interval and check for auto-stop conditions.
-*/
+// Main loop. Arduino library will call this function repeatedly.
 void loop() {
 
-  while (Serial.available() > 0) {
-    // Read the next character
-    chr = Serial.read();
-
-    // Terminate a command with a CR
-    if (chr == 13) {
-      if (arg == 1)
-        argv1[arg_index] = '\0';
-      else if (arg == 2)
-        argv2[arg_index] = '\0';
-      runCommand();
-      resetCommand();
-    }
-    // Use spaces to delimit parts of the command
-    else if (chr == ' ') {
-      // Step through the arguments
-      if (arg == 0)
-        arg = 1;
-      else if (arg == 1) {
-        argv1[arg_index] = '\0';
-        arg = 2;
-        arg_index = 0;
-      }
-      continue;
-    }
-    else {
-      if (arg == 0) {
-        // The first arg is the single-letter command
-        cmd = chr;
-      }
-      else if (arg == 1) {
-        // Subsequent arguments can be more than one character
-        argv1[arg_index] = chr;
-        arg_index++;
-      }
-      else if (arg == 2) {
-        argv2[arg_index] = chr;
-        arg_index++;
-      }
-    }
+  // flash the LED when we receive a command. very useful for debugging
+  if (Serial.available() > 0) {
+    digitalWrite(LED_PIN, HIGH);
   }
 
-  // TODO update this code to work with the new drivers
-  // If we are using base control, run a PID calculation at the appropriate intervals
-  if (millis() > nextPID) {
-    updatePID();
-    nextPID += PID_INTERVAL;
-  }
+  parseSerial();
 
-  // Check to see if we have exceeded the auto-stop interval
-  if ((millis() - lastMotorCommand) > AUTO_STOP_INTERVAL) {
-    setMotorSpeeds(0, 0);
-    moving = 0;
-  }
-
-  int interval = 1000;
-  int secondsToReset = 10000;
-  int millisecondsPassed = 0;
-
-  while (millisecondsPassed < secondsToReset) {
-    millisecondsPassed += interval;
-  }
-
-  if (millisecondsPassed > secondsToReset) {
-    millisecondsPassed = 0;
-    disablePins();
-  }
-
-  while (Serial) {
-    warningLight();
-    disablePins();
-
-    Serial.println("SERIAL DISCONNECTED");
-  }
-}
-
-void disablePins() {
-  CORE_PIN20_CONFIG = 0;
-  CORE_PIN19_CONFIG = 0;
-  CORE_PIN16_CONFIG = 0;
-  CORE_PIN15_CONFIG = 0;
-  CORE_PIN38_CONFIG = 0;
-  CORE_PIN37_CONFIG = 0;
-  CORE_PIN34_CONFIG = 0;
-  CORE_PIN33_CONFIG = 0;
-
-  Serial.println("DISABLE");
-}
-
-void warningLight() {
-
-  while (showWarning) {
-    digitalWrite(8, HIGH);
-    delay(1000);
-    digitalWrite(8, LOW);
-    delay(1000);
-  }
-
-  Serial.println("WARNING LIGHT");
+  delay(1);
+  digitalWrite(LED_PIN, LOW);
 }

@@ -25,7 +25,7 @@
 #define GRIPPER_PUL 33
 #define GRIPPER_DIR 34 
 #define GRIPPER_ENC_A 35
-#define GRIPPER_ENC_B 36  
+#define GRIPPER_ENC_B 36
 
 // ---------------- Brushless Motor Pin Assignments ----------------
 
@@ -50,7 +50,7 @@
 
 // ---------------- Misc Pin Assignments ----------------
 
-#define STATUS_LED 13
+#define LED_PIN 13
 #define HEADLIGHT 9
 
 #endif

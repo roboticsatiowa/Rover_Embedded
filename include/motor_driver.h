@@ -1,12 +1,7 @@
-/***************************************************************
-   Motor driver function definitions - by James Nugen
-   *************************************************************/
-
 #ifndef MOTOR_DRIVER_H
 #define MOTOR_DRIVER_H
 
-void initMotorController();
-void setMotorSpeed(int i, int spd);
-void setMotorSpeeds(int leftSpeed, int rightSpeed);
+void initMotorControllers();
+void setMotorSpeed(int a, int i, int spd);
 
 #endif

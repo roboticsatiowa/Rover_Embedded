@@ -3,7 +3,6 @@
 
 void initStepperController()
 {
-    // TODO set correct pins to outputs
     pinMode(BASEMOTOR_DIR, OUTPUT);
     pinMode(BASEMOTOR_PUL, OUTPUT);
     pinMode(WRIST_INCLINATION_DIR, OUTPUT);

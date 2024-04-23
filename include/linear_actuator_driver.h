@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 
+float lerp(float x, float a1, float b1, float a2, float b2);
 void init_linear_actuator_controller();
 void set_linear_actuator_speed(int i, int spd);
 
