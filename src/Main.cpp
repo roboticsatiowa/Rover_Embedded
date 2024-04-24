@@ -1,90 +1,118 @@
-#include "Arduino.h"
+#include <Arduino.h>
 // macros
 #include "commands.h"
 #include "pinout.h"
 
-// motor drivers
-#include "motor_driver.h"
-#include "encoder_driver.h"
-#include "linear_actuator_driver.h"
-#include "stepper_driver.h"
-
-// ---------------------- CONSTANTS ----------------------
+// Hardware drivers
+#include "Sabertooth.hpp"
+#include "Stepper.hpp"
+#include "IncrementalEncoder.hpp"
 
 #define BAUDRATE 115200           // Teensy <---> Jetson
-#define AUTO_STOP_INTERVAL 10000  // milliseconds   
+#define AUTO_STOP_INTERVAL 2000  // milliseconds
 
-// ---------------------- VARIABLES ----------------------
-// this is pretty shit practice we should get rid of these
-// lots of global variables = bad
-
-long lastMotorCommand = AUTO_STOP_INTERVAL;
-
-// Headlight global
+// TODO toggleable light class
 int headlight_state = 0;
-
-// warning global
+long lastCmd = AUTO_STOP_INTERVAL;
 int showWarning = 1;
+
+// Motor controllers
+Sabertooth *armActuators;
+Sabertooth *backWheelMotors;
+Sabertooth *midWheelMotors;
+Sabertooth *frontWheelMotors;
+
+// Stepper motors
+Stepper *baseMotor;
+Stepper *wristInclinationMotor;
+Stepper *wristRotationMotor;
+Stepper *gripperMotor;
+
+// Encoders
+IncrementalEncoder *baseEncoder;
+IncrementalEncoder *wristInclinationEncoder;
+IncrementalEncoder *wristRotationEncoder;
+IncrementalEncoder *gripperEncoder;
+
+// lists for easy iteration and indexing when parsing commands
+Stepper *stepperMotors[] = {baseMotor, wristInclinationMotor, wristRotationMotor, gripperMotor};
+IncrementalEncoder *encoders[] = {baseEncoder, wristInclinationEncoder, wristRotationEncoder, gripperEncoder};
+Sabertooth *wheelMotors[] = {backWheelMotors, midWheelMotors, frontWheelMotors};
+Sabertooth *actuators[] = {armActuators};
 
 // ---------------------- END GLOBAL VARIABLES ----------------------
 
+void pulseLED() {
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(1);
+  digitalWrite(LED_BUILTIN, LOW);
+}
+
+void stopAllMotors() {
+  for (int i = 0; i < 4; i++) {
+    stepperMotors[i]->setSpeed(0);
+  }
+
+  for (int i = 0; i < 3; i++) {
+    wheelMotors[i]->setSpeed(0, 0);
+    wheelMotors[i]->setSpeed(1, 0);
+  }
+
+  for (int i = 0; i < 1; i++) {
+    actuators[i]->setSpeed(0, 0);
+    actuators[i]->setSpeed(1, 0);
+  }
+}
 
 /* Run a command.  Commands are defined in commands.h */
-// this doesnt seem right
 int runCommand(char cmd, String args[], int numArgs) {
-
+  lastCmd = millis();
   switch (cmd) {
     case READ_ACTUATOR_POTENTIOMETER:
       Serial.print(String(analogRead(SHOULDER_POTENTIOMETER)) + " " + String(analogRead(ELBOW_POTENTIOMETER)));
       break;
 
     case STEPPER_RAW:
-      setStepperSpeed(args[0].toInt(), args[1].toInt());
-      Serial.println("OK");
+      stepperMotors[args[0].toInt()]->setSpeed(args[1].toInt());
       break;
 
     case READ_ENCODER:
-      Serial.println(readEncoder(args[0].toInt()));
+      for (int i = 0; i < 4; i++) {
+        Serial.print(encoders[i]->getTicks());
+        Serial.print(" ");
+      }
+      Serial.println();
       break;
-
     case RESET_ENCODERS:
-      resetAllEncoders();
+      for (int i = 0; i < 4; i++) {
+        encoders[i]->reset();
+      }
       break;
 
     case MOTOR_RAW:
-      lastMotorCommand = millis();
-      setMotorSpeed(0, args[0].toInt(), args[1].toInt());
-      setMotorSpeed(1, args[0].toInt(), args[1].toInt());
-      setMotorSpeed(2, args[0].toInt(), args[1].toInt());
+      // TODO individual motor speeds for easier turning and such
+      backWheelMotors->setSpeed(args[0].toInt(), args[1].toInt());
+      midWheelMotors->setSpeed(args[0].toInt(), args[1].toInt());
+      frontWheelMotors->setSpeed(args[0].toInt(), args[1].toInt());
       Serial.println(String(args[0].toInt()) + " " + String(args[1].toInt()));
       break;
 
     case ACTUATOR_RAW:
-      init_linear_actuator_controller();
-      set_linear_actuator_speed(args[0].toInt(), args[1].toInt());
+      armActuators->setSpeed(args[0].toInt(), args[1].toInt());
       break;
 
     case DISABLE_PINS:
-      CORE_PIN20_CONFIG = 0;
-      CORE_PIN19_CONFIG = 0;
-      CORE_PIN16_CONFIG = 0;
-      CORE_PIN15_CONFIG = 0;
-      CORE_PIN38_CONFIG = 0;
-      CORE_PIN37_CONFIG = 0;
-      CORE_PIN34_CONFIG = 0;
-      CORE_PIN33_CONFIG = 0;
-      Serial.println("DISABLE");
+      stopAllMotors();
+      Serial.println("OK");
       break;
 
     case HEADLIGHT_CONTROL:
       digitalWrite(HEADLIGHT, !headlight_state);
       headlight_state = !headlight_state;
-      Serial.println("OK");
       break;
 
     case WARNING_LIGHT:
       // warningLight();
-      Serial.println("OK");
       break;
     default:
       Serial.println("Invalid Command");
@@ -95,7 +123,6 @@ int runCommand(char cmd, String args[], int numArgs) {
 }
 
 void parseSerial() {
-
   char cmd = ' ';
 
   String args[4];
@@ -104,19 +131,18 @@ void parseSerial() {
   }
 
   int argNum = 0;
-  
   while (Serial.available() > 0) {
-
     char chr = Serial.read();
+
+    // invalid command empty string
+    if (cmd == ' ' && chr == '\r') {
+        return;
+    }
 
     // Terminate command with a carriage return (CR)
     if (chr == '\r') {
-      if (cmd == ' ') {
-
-        continue;
-      }
       runCommand(cmd, args, argNum);
-      continue;
+      return;
     }
 
     // Use spaces to delimit parts of the command
@@ -131,65 +157,49 @@ void parseSerial() {
       continue;
     }
 
-    // Store the argument characters
     args[argNum - 1] += chr;
   }
 }
 
-/* Setup function--runs once at startup. */
-// TODO these should be refactored together into their own functions
+// --------------------------------------------
+//              Main Setup and Loop
+// --------------------------------------------
+
+
 void setup() {
+  // Main serial port for communication with Jetson
   Serial.begin(BAUDRATE);
 
-  // initialize linear actuator serial port
-  init_linear_actuator_controller();
+  // Initialize motor controllers
+  armActuators = new Sabertooth(&LINEAR_ACTUATOR_SERIAL, Sabertooth::BAUD_38400); // RX=28, TX=29
+  backWheelMotors = new Sabertooth(&BACK_WHEEL_SERIAL, Sabertooth::BAUD_38400); // TX=1
+  midWheelMotors = new Sabertooth(&MID_WHEEL_SERIAL, Sabertooth::BAUD_38400); // TX=8
+  frontWheelMotors = new Sabertooth(&FRONT_WHEEL_SERIAL, Sabertooth::BAUD_38400); //TX=24
 
-  // initialize stepper encoder pins as inputs
-  pinMode(BASEMOTOR_ENC_A, INPUT_PULLUP);
-  pinMode(BASEMOTOR_ENC_B, INPUT_PULLUP);
-  pinMode(WRIST_INCLINATION_ENC_A, INPUT_PULLUP);
-  pinMode(WRIST_INCLINATION_ENC_B, INPUT_PULLUP);
-  pinMode(WRIST_ROTATION_ENC_A, INPUT_PULLUP);
-  pinMode(WRIST_ROTATION_ENC_B, INPUT_PULLUP);
-  pinMode(GRIPPER_ENC_A, INPUT_PULLUP);
-  pinMode(GRIPPER_ENC_B, INPUT_PULLUP);
+  // Initialize stepper motor pins as outputs
+  baseMotor = new Stepper(BASEMOTOR_PUL, BASEMOTOR_DIR);
+  wristInclinationMotor = new Stepper(WRIST_INCLINATION_PUL, WRIST_INCLINATION_DIR);
+  wristRotationMotor = new Stepper(WRIST_ROTATION_PUL, WRIST_ROTATION_DIR);
+  gripperMotor = new Stepper(GRIPPER_PUL, GRIPPER_DIR);
 
-  // attach interrupts to encoder pins
-  attachInterrupt(digitalPinToInterrupt(BASEMOTOR_ENC_A), BASEMOTOR_ISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(BASEMOTOR_ENC_B), *BASEMOTOR_ISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(WRIST_INCLINATION_ENC_A), WRIST_INCLINATION_ISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(WRIST_INCLINATION_ENC_B), WRIST_INCLINATION_ISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(WRIST_ROTATION_ENC_A), WRIST_ROTATION_ISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(WRIST_ROTATION_ENC_B), WRIST_ROTATION_ISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(GRIPPER_ENC_A), GRIPPER_ISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(GRIPPER_ENC_B), GRIPPER_ISR, CHANGE);
+  // Initialize encoders
+  baseEncoder = new IncrementalEncoder(BASEMOTOR_ENC_A, BASEMOTOR_ENC_B);
+  wristInclinationEncoder = new IncrementalEncoder(WRIST_INCLINATION_ENC_A, WRIST_INCLINATION_ENC_B);
+  wristRotationEncoder = new IncrementalEncoder(WRIST_ROTATION_ENC_A, WRIST_ROTATION_ENC_B);
+  gripperEncoder = new IncrementalEncoder(GRIPPER_ENC_A, GRIPPER_ENC_B);
 
   // initialize potentiometer pins as inputs
   pinMode(ELBOW_POTENTIOMETER, INPUT);
   pinMode(SHOULDER_POTENTIOMETER, INPUT);
 
-  // initialize motor driver pins as outputs
-  pinMode(R_WHEEL_DIR, OUTPUT);
-  pinMode(L_WHEEL_DIR, OUTPUT);
-  pinMode(R_FWD_WHEEL_PUL, OUTPUT);
-  pinMode(R_MID_WHEEL_PUL, OUTPUT);
-  pinMode(R_BCK_WHEEL_PUL, OUTPUT);
-  pinMode(L_FWD_WHEEL_PUL, OUTPUT);
-  pinMode(L_MID_WHEEL_PUL, OUTPUT);
-  pinMode(L_BCK_WHEEL_PUL, OUTPUT);
-
-  initMotorControllers();
-
-  //led pin
-  pinMode(13, OUTPUT);
-
-  // initialize headlight pin as output
+  // misc pins
+  pinMode(LED_BUILTIN, OUTPUT);
   pinMode(HEADLIGHT, OUTPUT);
 
-  // initialize stepper motor pins as outputs
-  initStepperController();
+  // Allow external hardware some time to boot up
+  delay(100);
 
-  delay(50); // wait for the motor controllers to initialize
+  // Enable all motor controllers
   pinMode(GLOBAL_ENABLE, OUTPUT);
   digitalWrite(GLOBAL_ENABLE, HIGH);
 }
@@ -199,11 +209,14 @@ void loop() {
 
   // flash the LED when we receive a command. very useful for debugging
   if (Serial.available() > 0) {
-    digitalWrite(LED_PIN, HIGH);
+    pulseLED();
   }
 
   parseSerial();
 
-  delay(1);
-  digitalWrite(LED_PIN, LOW);
+
+  // Safety auto stop
+  if (millis() - lastCmd > AUTO_STOP_INTERVAL) {
+    stopAllMotors();
+  }
 }

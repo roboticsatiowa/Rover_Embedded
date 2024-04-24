@@ -3,9 +3,24 @@
    serial link.
 */
 // TODO fix inconsistent naming
+// TODO convert to enum
 
 #ifndef COMMANDS_H
 #define COMMANDS_H
+
+enum COMMANDS {
+  // Encoders
+  READ_ENCODER = 'e', // e [encoder id]
+  RESET_ENCODERS = 'f', // f
+  ACTUATOR_RAW = 'h', // h [actuator id] [throttle]
+  READ_ACTUATOR_POTENTIOMETER = 'i', // i 
+  MOTOR_RAW = 'l', // l [throttle]
+  STEPPER_RAW = 'o', // o [stepper id] [throttle]
+  // Misc commands
+  HEADLIGHT_CONTROL = 'z',
+  DISABLE_PINS = 'd',
+  WARNING_LIGHT = 'w'
+};
 
 // Encoders
 #define READ_ENCODER 'e' // e [encoder id]

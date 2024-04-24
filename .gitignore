@@ -1,4 +1,4 @@
 .pio
-.vscode
+.vscode/*
 compile_flags.txt
 .clangd

@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+// TODO convert to enums
+
 #define GLOBAL_ENABLE 0
 
 // ---------------- Stepper Motor Pin Assignments (May be replaced by servos in the future) ----------------
@@ -27,21 +29,12 @@
 #define GRIPPER_ENC_A 35
 #define GRIPPER_ENC_B 36
 
-// ---------------- Brushless Motor Pin Assignments ----------------
+// ---------------- Serial Port Assignments ----------------
 
-#define L_FWD_WHEEL_PUL 1 
-#define L_MID_WHEEL_PUL 2
-#define L_BCK_WHEEL_PUL 3
-#define L_WHEEL_DIR 4
-
-#define R_FWD_WHEEL_PUL 5
-#define R_MID_WHEEL_PUL 6
-#define R_BCK_WHEEL_PUL 7
-#define R_WHEEL_DIR 8
-
-// ---------------- Linear Actuator Pin Assignments ----------------
-
-#define LINEAR_ACTUATOR_SERIAL Serial7
+#define LINEAR_ACTUATOR_SERIAL Serial7  // RX=28, TX=29
+#define BACK_WHEEL_SERIAL Serial1       // RX=0,  TX=1
+#define MID_WHEEL_SERIAL Serial2        // RX=7,  TX=8
+#define FRONT_WHEEL_SERIAL Serial6      // RX=25, TX=24
 
 // ---------------- Potentiometer Pin Assignments ----------------
 
@@ -50,7 +43,6 @@
 
 // ---------------- Misc Pin Assignments ----------------
 
-#define LED_PIN 13
 #define HEADLIGHT 9
 
 #endif
