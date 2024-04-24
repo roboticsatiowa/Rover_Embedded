@@ -35,18 +35,25 @@ public:
 
     static void handleInterupt() {
         for (int i = 0; i <encoderCount; i++) {
-            encoders[i]->update();
+            if (encoders[i]->hasChanged()) {
+                encoders[i]->update();
+            }
         }
     }
-
+    
     void update() {
+        // 0b0000                       0b0000
+        //   ^^ = prev state a and b        ^^ = current state a and b
+        // combines into a 4 bit number that corresponds to the state of the encoder
+        // for more info see https://en.wikipedia.org/wiki/Incremental_encoder
+
         prev <<= 2;
         prev = prev | digitalRead(pin_a) << 1 | digitalRead(pin_b);
         angle += (long)ENC_STATES[(prev & 0b1111)];
     }
 
     bool hasChanged() {
-        return (prev & 0b11) != 0;
+        return (prev & 0b11) != (digitalRead(pin_a) << 3 | digitalRead(pin_b) << 2) & 0b11;
     }
 
     long getTicks() {
