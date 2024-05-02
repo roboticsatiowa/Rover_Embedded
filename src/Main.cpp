@@ -9,7 +9,8 @@
 #include "IncrementalEncoder.hpp"
 
 #define BAUDRATE 115200           // Teensy <---> Jetson
-#define AUTO_STOP_INTERVAL 2000  // milliseconds
+#define AUTO_STOP_INTERVAL 1000  // milliseconds //TODO this is an absurdly high value for testing
+
 
 // TODO toggleable light class
 int headlight_state = 0;
@@ -35,10 +36,7 @@ IncrementalEncoder *wristRotationEncoder;
 IncrementalEncoder *gripperEncoder;
 
 // lists for easy iteration and indexing when parsing commands
-Stepper *stepperMotors[] = {baseMotor, wristInclinationMotor, wristRotationMotor, gripperMotor};
-IncrementalEncoder *encoders[] = {baseEncoder, wristInclinationEncoder, wristRotationEncoder, gripperEncoder};
-Sabertooth *wheelMotors[] = {backWheelMotors, midWheelMotors, frontWheelMotors};
-Sabertooth *actuators[] = {armActuators};
+
 
 // ---------------------- END GLOBAL VARIABLES ----------------------
 
@@ -48,46 +46,65 @@ void pulseLED() {
   digitalWrite(LED_BUILTIN, LOW);
 }
 
-void stopAllMotors() {
-  for (int i = 0; i < 4; i++) {
-    stepperMotors[i]->setSpeed(0);
-  }
+// // void stopAllMotors() {
+//     for (int i = 0; i < 4; i++) {
+//       if (stepperMotors[i] != nullptr) {
+//         stepperMotors[i]->setSpeed(0);
+//       }
+//     }
 
-  for (int i = 0; i < 3; i++) {
-    wheelMotors[i]->setSpeed(0, 0);
-    wheelMotors[i]->setSpeed(1, 0);
-  }
+//     for (int i = 0; i < 3; i++) {
+//       if (wheelMotors[i] != nullptr) {
+//         wheelMotors[i]->setSpeed(0, 0);
+//         wheelMotors[i]->setSpeed(1, 0);
+//       }
+//     }
 
-  for (int i = 0; i < 1; i++) {
-    actuators[i]->setSpeed(0, 0);
-    actuators[i]->setSpeed(1, 0);
-  }
-}
+//     for (int i = 0; i < 1; i++) {
+//       if (actuators[i] != nullptr) {
+//         actuators[i]->setSpeed(0, 0);
+//         actuators[i]->setSpeed(1, 0);
+//       }
+//     }
+// }
 
 /* Run a command.  Commands are defined in commands.h */
 int runCommand(char cmd, String args[], int numArgs) {
   lastCmd = millis();
+  
+  int index = args[0].toInt();
+
   switch (cmd) {
     case READ_ACTUATOR_POTENTIOMETER:
       Serial.print(String(analogRead(SHOULDER_POTENTIOMETER)) + " " + String(analogRead(ELBOW_POTENTIOMETER)));
       break;
 
     case STEPPER_RAW:
-      stepperMotors[args[0].toInt()]->setSpeed(args[1].toInt());
+
+      if (index == 0) {
+        baseMotor->setSpeed(args[1].toInt());
+      } else if (index == 1) {
+        wristInclinationMotor->setSpeed(args[1].toInt());
+      } else if (index == 2) {
+        wristRotationMotor->setSpeed(args[1].toInt());
+      } else if (index == 3) {
+        gripperMotor->setSpeed(args[1].toInt());
+      }
+
       break;
 
-    case READ_ENCODER:
-      for (int i = 0; i < 4; i++) {
-        Serial.print(encoders[i]->getTicks());
-        Serial.print(" ");
-      }
-      Serial.println();
-      break;
-    case RESET_ENCODERS:
-      for (int i = 0; i < 4; i++) {
-        encoders[i]->reset();
-      }
-      break;
+    // case READ_ENCODER:
+    //   for (int i = 0; i < 4; i++) {
+    //     Serial.print(encoders[i]->getTicks());
+    //     Serial.print(" ");
+    //   }
+    //   Serial.println();
+    //   break;
+    // case RESET_ENCODERS:
+    //   for (int i = 0; i < 4; i++) {
+    //     encoders[i]->reset();
+    //   }
+    //   break;
 
     case MOTOR_RAW:
       // TODO individual motor speeds for easier turning and such
@@ -102,7 +119,7 @@ int runCommand(char cmd, String args[], int numArgs) {
       break;
 
     case DISABLE_PINS:
-      stopAllMotors();
+      // stopAllMotors();
       Serial.println("OK");
       break;
 
@@ -142,6 +159,7 @@ void parseSerial() {
     // Terminate command with a carriage return (CR)
     if (chr == '\r') {
       runCommand(cmd, args, argNum);
+      Serial.println("OK");
       return;
     }
 
@@ -180,13 +198,13 @@ void setup() {
   baseMotor = new Stepper(BASEMOTOR_PUL, BASEMOTOR_DIR);
   wristInclinationMotor = new Stepper(WRIST_INCLINATION_PUL, WRIST_INCLINATION_DIR);
   wristRotationMotor = new Stepper(WRIST_ROTATION_PUL, WRIST_ROTATION_DIR);
-  gripperMotor = new Stepper(GRIPPER_PUL, GRIPPER_DIR);
+  gripperMotor = new Stepper(GRIPPER_PUL, GRIPPER_DIR); 
 
   // Initialize encoders
-  baseEncoder = new IncrementalEncoder(BASEMOTOR_ENC_A, BASEMOTOR_ENC_B);
-  wristInclinationEncoder = new IncrementalEncoder(WRIST_INCLINATION_ENC_A, WRIST_INCLINATION_ENC_B);
-  wristRotationEncoder = new IncrementalEncoder(WRIST_ROTATION_ENC_A, WRIST_ROTATION_ENC_B);
-  gripperEncoder = new IncrementalEncoder(GRIPPER_ENC_A, GRIPPER_ENC_B);
+  // baseEncoder = new IncrementalEncoder(BASEMOTOR_ENC_A, BASEMOTOR_ENC_B);
+  // wristInclinationEncoder = new IncrementalEncoder(WRIST_INCLINATION_ENC_A, WRIST_INCLINATION_ENC_B);
+  // wristRotationEncoder = new IncrementalEncoder(WRIST_ROTATION_ENC_A, WRIST_ROTATION_ENC_B);
+  // gripperEncoder = new IncrementalEncoder(GRIPPER_ENC_A, GRIPPER_ENC_B);
 
   // initialize potentiometer pins as inputs
   pinMode(ELBOW_POTENTIOMETER, INPUT);
@@ -200,8 +218,8 @@ void setup() {
   delay(100);
 
   // Enable all motor controllers
-  pinMode(GLOBAL_ENABLE, OUTPUT);
-  digitalWrite(GLOBAL_ENABLE, HIGH);
+  // pinMode(GLOBAL_ENABLE, OUTPUT);
+  // digitalWrite(GLOBAL_ENABLE, HIGH);
 }
 
 // Main loop. Arduino library will call this function repeatedly.
@@ -216,7 +234,9 @@ void loop() {
 
 
   // Safety auto stop
-  if (millis() - lastCmd > AUTO_STOP_INTERVAL) {
-    stopAllMotors();
-  }
+  // if (millis() - lastCmd > AUTO_STOP_INTERVAL) {
+  //   lastCmd = millis();
+  //   stopAllMotors();
+  //   Serial.println("STOPPING");
+  // }
 }

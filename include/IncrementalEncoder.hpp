@@ -53,7 +53,7 @@ public:
     }
 
     bool hasChanged() {
-        return (prev & 0b11) != (digitalRead(pin_a) << 3 | digitalRead(pin_b) << 2) & 0b11;
+        return (prev & 0b11) != ((digitalRead(pin_a) << 3 | digitalRead(pin_b) << 2) & 0b11);
     }
 
     long getTicks() {

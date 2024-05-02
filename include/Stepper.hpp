@@ -24,12 +24,17 @@ public:
      * @param max_freq The maximum frequency to use for the stepper motor. Default is 2000 Hz
     */
     Stepper(int pul_pin, int dir_pin, int min_freq = DEFAULT_MIN_STEPPER_FREQ, int max_freq = DEFAULT_MAX_STEPPER_FREQ) {
+
+        //https://forum.pjrc.com/index.php?threads/using-the-open-drain-capabilities-of-the-teensy-3-1-processor.25393/
+
         this->pul_pin = pul_pin;
         this->dir_pin = dir_pin;
         this->min_freq = min_freq;
         this->max_freq = max_freq;
-        pinMode(pul_pin, OUTPUT);
-        pinMode(dir_pin, OUTPUT);
+
+        
+        pinMode(pul_pin, OUTPUT_OPENDRAIN);
+        pinMode(dir_pin, OUTPUT_OPENDRAIN);
     }
 
     /**
