@@ -10,9 +10,12 @@ class Stepper {
 private:
     int pul_pin;
     int dir_pin;
-    int min_freq;
-    int max_freq;
+    int min_freq_hz;
+    int max_freq_hz;
+    int freq_hz;
+    unsigned long period_us;
     float lerp(float x, float a1, float b1, float a2, float b2){return a2 + (x - a1) * (b2 - a2) / (b1 - a1);}
+    elapsedMicros pulseTimer;
 
 public:
 
@@ -29,9 +32,8 @@ public:
 
         this->pul_pin = pul_pin;
         this->dir_pin = dir_pin;
-        this->min_freq = min_freq;
-        this->max_freq = max_freq;
-
+        this->min_freq_hz = min_freq;
+        this->max_freq_hz = max_freq;
         
         pinMode(pul_pin, OUTPUT_OPENDRAIN);
         pinMode(dir_pin, OUTPUT_OPENDRAIN);
@@ -44,9 +46,28 @@ public:
     void setSpeed(int speed) {
         int dir = speed < 0 ? 1 : 0;
         speed = abs(constrain(speed, -255, 255));
-        digitalWrite(dir_pin, dir);
-        analogWrite(pul_pin, (speed != 0 ? 128 : 0));
-        analogWriteFrequency(pul_pin, (int)lerp(speed, 0, 255, min_freq, max_freq));
+        digitalWriteFast(dir_pin, dir);
+        if (speed == 0) {
+            digitalWriteFast(pul_pin, LOW);
+            freq_hz = 0;
+            period_us = 0;
+            return;
+        }
+
+        freq_hz = (int) lerp(speed, 0, 255, min_freq_hz, max_freq_hz);
+        period_us = 1000000 / freq_hz;
+        
+    }
+
+    void updatePin() {
+        if (freq_hz == 0) {
+            return;
+        }
+
+        if (elapsedMicros() > period_us) {
+            pulseTimer = 0;
+            digitalToggleFast(pul_pin);
+        }
     }
 };
 
