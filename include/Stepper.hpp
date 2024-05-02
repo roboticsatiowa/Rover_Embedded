@@ -55,10 +55,14 @@ public:
         }
 
         freq_hz = (int) lerp(speed, 0, 255, min_freq_hz, max_freq_hz);
-        period_us = 1000000 / freq_hz;
+        period_us = 100000 / freq_hz;
         
     }
 
+    /**
+     * Update the pulse signal for the stepper motor
+     * must be called at sufficient frequency. very minimum of 3-4 times the period of the signal per second
+    */
     void updatePin() {
         if (freq_hz == 0) {
             return;
