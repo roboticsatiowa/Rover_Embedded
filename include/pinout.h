@@ -5,8 +5,6 @@
 
 // TODO convert to enums
 
-#define GLOBAL_ENABLE 0
-
 // ---------------- Stepper Motor Pin Assignments (May be replaced by servos in the future) ----------------
 
 #define BASEMOTOR_PUL 19

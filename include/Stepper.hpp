@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#define DEFAULT_MAX_STEPPER_FREQ 2000
+#define DEFAULT_MAX_STEPPER_FREQ 1000
 #define DEFAULT_MIN_STEPPER_FREQ 100
 
 class Stepper {
@@ -12,8 +12,8 @@ private:
     int dir_pin;
     int min_freq_hz;
     int max_freq_hz;
-    int freq_hz;
-    unsigned long period_us;
+    int freq_hz = 0;
+    unsigned long period_us = 0;
     float lerp(float x, float a1, float b1, float a2, float b2){return a2 + (x - a1) * (b2 - a2) / (b1 - a1);}
     elapsedMicros pulseTimer;
 
@@ -56,6 +56,8 @@ public:
 
         freq_hz = (int) lerp(speed, 0, 255, min_freq_hz, max_freq_hz);
         period_us = 100000 / freq_hz;
+
+        Serial.println("Speed: " + String(speed) + " Freq: " + String(freq_hz) + " Period: " + String(period_us));
         
     }
 
@@ -68,10 +70,11 @@ public:
             return;
         }
 
-        if (elapsedMicros() > period_us) {
+        if (pulseTimer > period_us) {
             pulseTimer = 0;
             digitalToggleFast(pul_pin);
         }
+
     }
 };
 

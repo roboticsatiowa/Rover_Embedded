@@ -9,7 +9,7 @@
 #include "IncrementalEncoder.hpp"
 
 #define BAUDRATE 115200           // Teensy <---> Jetson
-#define AUTO_STOP_INTERVAL 1000  // milliseconds //TODO this is an absurdly high value for testing
+#define AUTO_STOP_INTERVAL 2000 // milliseconds
 
 
 // TODO toggleable light class
@@ -40,33 +40,17 @@ IncrementalEncoder *gripperEncoder;
 
 // ---------------------- END GLOBAL VARIABLES ----------------------
 
-void pulseLED() {
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(1);
-  digitalWrite(LED_BUILTIN, LOW);
+void stopAllMotors() {
+    armActuators->setSpeed(0, 0);
+    backWheelMotors->setSpeed(0, 0);
+    midWheelMotors->setSpeed(0, 0);
+    frontWheelMotors->setSpeed(0, 0);
+
+    baseMotor->setSpeed(0);
+    wristInclinationMotor->setSpeed(0);
+    wristRotationMotor->setSpeed(0);
+    gripperMotor->setSpeed(0);
 }
-
-// // void stopAllMotors() {
-//     for (int i = 0; i < 4; i++) {
-//       if (stepperMotors[i] != nullptr) {
-//         stepperMotors[i]->setSpeed(0);
-//       }
-//     }
-
-//     for (int i = 0; i < 3; i++) {
-//       if (wheelMotors[i] != nullptr) {
-//         wheelMotors[i]->setSpeed(0, 0);
-//         wheelMotors[i]->setSpeed(1, 0);
-//       }
-//     }
-
-//     for (int i = 0; i < 1; i++) {
-//       if (actuators[i] != nullptr) {
-//         actuators[i]->setSpeed(0, 0);
-//         actuators[i]->setSpeed(1, 0);
-//       }
-//     }
-// }
 
 /* Run a command.  Commands are defined in commands.h */
 int runCommand(char cmd, String args[], int numArgs) {
@@ -124,8 +108,7 @@ int runCommand(char cmd, String args[], int numArgs) {
       break;
 
     case HEADLIGHT_CONTROL:
-      digitalWrite(HEADLIGHT, !headlight_state);
-      headlight_state = !headlight_state;
+      digitalToggleFast(HEADLIGHT);
       break;
 
     case WARNING_LIGHT:
@@ -213,6 +196,7 @@ void setup() {
   // misc pins
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(HEADLIGHT, OUTPUT);
+  digitalWrite(HEADLIGHT, LOW);
 
   // Allow external hardware some time to boot up
   delay(100);
@@ -224,11 +208,6 @@ void setup() {
 
 // Main loop. Arduino library will call this function repeatedly.
 void loop() {
-
-  // flash the LED when we receive a command. very useful for debugging
-  if (Serial.available() > 0) {
-    pulseLED();
-  }
 
   parseSerial();
 
