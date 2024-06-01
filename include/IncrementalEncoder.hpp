@@ -3,6 +3,15 @@
 
 #include <Arduino.h>
 
+// could also look into dedicated libraries or built in hardware encoder support
+// currently each 'tick' results in multiple calls to the interrupt handler despite the encoder only moving once
+// need to look into why this is happening
+
+// TODO debounce the signal (prevent redundant interrupt calls which slow down other processes). this may or may not be the culprit
+// TODO hardware encoder support (if possible)
+
+// https://forum.pjrc.com/index.php?threads/using-5v-rotary-encoders-with-teensy-4-1.72834/
+
 static const int8_t ENC_STATES[] = { 0, 1, -1, 0, -1, 0, 0, 1, 1, 0, 0, -1, 0, -1, 1, 0 };
 
 class IncrementalEncoder

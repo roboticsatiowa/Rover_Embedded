@@ -214,6 +214,8 @@ void loop() {
 
   // need to update pins manually because we are using an open collecter (common anode) configuration which isnt supported by the hardware pwm timer.
   // see https://www.omc-stepperonline.com/download/DM542T.pdf section 4 for more info on open drain configuration
+  
+  // TODO manually updating pins work fine for now but will be severely impacted by any blocking code. need to look into a better solution
   wristInclinationMotor->updatePin();
   wristRotationMotor->updatePin();
   baseMotor->updatePin();
