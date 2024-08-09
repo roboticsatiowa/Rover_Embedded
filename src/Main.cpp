@@ -2,11 +2,13 @@
 // macros
 #include "commands.h"
 #include "pinout.h"
+#include <Wire.h>
 
 // Hardware drivers
 #include "Sabertooth.hpp"
 #include "Stepper.hpp"
 #include "IncrementalEncoder.hpp"
+#include "BME280.hpp"
 
 #define BAUDRATE 115200           // Teensy <---> Jetson
 #define AUTO_STOP_INTERVAL 2000 // milliseconds
@@ -115,6 +117,11 @@ int runCommand(char cmd, String args[], int numArgs) {
       // warningLight();
       break;
 
+    case BME_SENSOR:
+      getBMEsensorInfo();
+      break;
+      
+
     case READ_BATTERY_VOLTAGE:
       Serial.println(((analogRead(BATTERY_VOLTAGE) * 5.0) / 1024.0)*(7500.0+30000.0)/7500.0, 2);
       break;
@@ -122,6 +129,8 @@ int runCommand(char cmd, String args[], int numArgs) {
     default:
       Serial.println("Invalid Command");
       break;
+
+      
   }
 
   return 0;
@@ -208,8 +217,10 @@ void setup() {
 
   // Allow external hardware some time to boot up
   delay(100);
-
-  // Enable all motor controllers
+    
+  // BME sensor setup
+  #define Addr 0x76  
+  Wire.begin();  
   // pinMode(GLOBAL_ENABLE, OUTPUT);
   // digitalWrite(GLOBAL_ENABLE, HIGH);
 }
