@@ -4,7 +4,10 @@
 // This code is designed to work with the BME280_I2CS I2C Mini Module available from ControlEverything.com.
 // https://www.controleverything.com/content/Humidity?sku=BME280_I2CS#tabs-0-product_tabset-2
 
-#include<Wire.h>
+#ifndef BME280_H
+#define BME280_H
+
+#include <Wire.h>
 
 // BME280 I2C address is 0x76(108)
 #define Addr 0x76
@@ -201,4 +204,11 @@ void getBMEsensorInfo()
   Serial.print(humidity);
   Serial.println(" RH");
   delay(1000);
+
 }
+
+float getTemp() {
+  return cTemp
+}
+
+#endif
