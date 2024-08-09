@@ -17,7 +17,7 @@ void setup()
   Serial.begin(9600);
 }
 
-void loop()
+void getBMEsensorInfo()
 {
   unsigned int b1[24];
   unsigned int data[8];
