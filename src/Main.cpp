@@ -114,6 +114,11 @@ int runCommand(char cmd, String args[], int numArgs) {
     case WARNING_LIGHT:
       // warningLight();
       break;
+
+    case READ_BATTERY_VOLTAGE:
+      Serial.println(((analogRead(BATTERY_VOLTAGE) * 5.0) / 1024.0)*(7500.0+30000.0)/7500.0, 2);
+      break;
+
     default:
       Serial.println("Invalid Command");
       break;
@@ -196,6 +201,9 @@ void setup() {
   // misc pins
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(HEADLIGHT, OUTPUT);
+
+  pinMode(BATTERY_VOLTAGE, INPUT);
+
   digitalWrite(HEADLIGHT, LOW);
 
   // Allow external hardware some time to boot up

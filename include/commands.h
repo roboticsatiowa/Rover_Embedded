@@ -19,10 +19,10 @@ enum COMMANDS {
   // Misc commands
   HEADLIGHT_CONTROL = 'z',
   DISABLE_PINS = 'd',
-  WARNING_LIGHT = 'w'
+  WARNING_LIGHT = 'w',
+  READ_BATTERY_VOLTAGE = 'g'
 };
 
-// Encoders
 #define READ_ENCODER 'e' // e [encoder id]
 #define RESET_ENCODERS 'f' // f
 #define ACTUATOR_RAW 'h' // h [actuator id] [throttle]
@@ -36,6 +36,8 @@ enum COMMANDS {
 //disable pins
 #define DISABLE_PINS 'd'
 #define WARNING_LIGHT 'w'
+
+#define READ_BATTERY_VOLTAGE 'g'
 
 #endif
 

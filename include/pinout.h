@@ -39,6 +39,8 @@
 #define SHOULDER_POTENTIOMETER PIN_A12
 #define ELBOW_POTENTIOMETER PIN_A13
 
+#define BATTERY_VOLTAGE PIN_A5
+
 // ---------------- Misc Pin Assignments ----------------
 
 #define HEADLIGHT 9
