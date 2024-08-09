@@ -211,8 +211,8 @@ void setup() {
   delay(100);
     
   // BME sensor setup
-  Wire.begin();
-    
+  #define Addr 0x76  
+  Wire.begin();  
   // pinMode(GLOBAL_ENABLE, OUTPUT);
   // digitalWrite(GLOBAL_ENABLE, HIGH);
 }
