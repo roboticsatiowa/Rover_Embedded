@@ -2,7 +2,6 @@
 // macros
 #include "commands.h"
 #include "pinout.h"
-#include <Wire.h>
 
 // Hardware drivers
 #include "Sabertooth.hpp"
@@ -35,6 +34,8 @@ IncrementalEncoder *baseEncoder;
 IncrementalEncoder *wristInclinationEncoder;
 IncrementalEncoder *wristRotationEncoder;
 IncrementalEncoder *gripperEncoder;
+
+BME280 bme;
 
 // lists for easy iteration and indexing when parsing commands
 
@@ -126,9 +127,9 @@ int runCommand(char cmd, String args[], int numArgs)
     break;
 
   case BME_SENSOR:
-    Serial.println("Temperatuure: " + getTemperature());
-    Serial.print("Pressure: " + getPressure());
-    Serial.print("Humidity: " + getHumidity());
+    Serial.println(bme.getTemperature());
+    Serial.println(bme.getPressure());
+    Serial.println(bme.getHumidity());
     break;
 
   case READ_BATTERY_VOLTAGE:
@@ -232,8 +233,7 @@ void setup()
   // Allow external hardware some time to boot up
   delay(100);
 
-// BME sensor setup
-#define Addr 0x76
+  // BME sensor setup
   Wire.begin();
   // pinMode(GLOBAL_ENABLE, OUTPUT);
   // digitalWrite(GLOBAL_ENABLE, HIGH);

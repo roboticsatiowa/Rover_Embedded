@@ -12,8 +12,11 @@
 // BME280 I2C address is 0x76(108)
 #define Addr 0x76
 
-class BME
+class BME280;
+
+class BME280
 {
+
 private:
   double cTemp;
   unsigned int dig_T1, dig_P1, dig_H1, dig_H3;
@@ -162,42 +165,8 @@ private:
     return humidity;
   }
 
-  // Main function to get BME sensor information and display it
-  void getBMEsensorInfo()
-  {
-    unsigned int data[8];
-    readCalibrationData();
-    readHumidityCalibrationData();
-    setSensorConfig();
-    readSensorData(data);
-
-    // Convert raw data to actual values
-    long adc_p = (((long)(data[0] & 0xFF) * 65536) + ((long)(data[1] & 0xFF) * 256) + (long)(data[2] & 0xF0)) / 16;
-    long adc_t = (((long)(data[3] & 0xFF) * 65536) + ((long)(data[4] & 0xFF) * 256) + (long)(data[5] & 0xF0)) / 16;
-    long adc_h = ((long)(data[6] & 0xFF) * 256 + (long)(data[7] & 0xFF));
-
-    double t_fine = calculateTemperature(adc_t);
-    double pressure = calculatePressure(adc_p, t_fine);
-    double humidity = calculateHumidity(adc_h, t_fine);
-
-    // Output data to serial monitor
-    Serial.print("Temperature in Celsius : ");
-    Serial.print(cTemp);
-    Serial.println(" C");
-    Serial.print("Temperature in Fahrenheit : ");
-    Serial.print(cTemp * 1.8 + 32);
-    Serial.println(" F");
-    Serial.print("Pressure : ");
-    Serial.print(pressure);
-    Serial.println(" hPa");
-    Serial.print("Relative Humidity : ");
-    Serial.print(humidity);
-    Serial.println(" RH");
-    delay(1000);
-  }
-
 public:
-  void getTemperature()
+  double getTemperature()
   {
     unsigned int data[8];
     readCalibrationData();
@@ -211,7 +180,7 @@ public:
     return cTemp;
   }
 
-  void getPressure()
+  double getPressure()
   {
     unsigned int data[8];
     readCalibrationData();
@@ -228,7 +197,7 @@ public:
     return pressure;
   }
 
-  void getHumidity()
+  double getHumidity()
   {
     unsigned int data[8];
     readCalibrationData();
