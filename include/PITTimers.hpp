@@ -3,7 +3,7 @@
 #include <functional>
 
 const int NUM_TIMERS = 4;
-uint32_t FREQUENCIES[NUM_TIMERS] = {10000, 15000, 20000, 25000};
+uint32_t FREQUENCIES[NUM_TIMERS] = {0, 0, 0, 0};
 
 using TimerCallback = std::function<void()>;
 TimerCallback timerCallbacks[NUM_TIMERS] = {nullptr};

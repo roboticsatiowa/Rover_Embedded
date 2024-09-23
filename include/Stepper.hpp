@@ -1,6 +1,4 @@
-#ifndef STEPPER_DRIVER_H
-#define STEPPER_DRIVER_H
-
+#pragma once
 #include <Arduino.h>
 #include "PITTimers.hpp"
 
@@ -16,13 +14,27 @@ private:
 	int max_freq_hz;
 	int timer_index;
 
-	float lerp(float x, float a1, float b1, float a2, float b2)
+	float lerp(float x,
+			   float a1,
+			   float b1,
+			   float a2,
+			   float b2)
 	{
 		return a2 + (x - a1) * (b2 - a2) / (b1 - a1);
 	}
 
 public:
-	Stepper(int pul_pin, int dir_pin, int min_freq = DEFAULT_MIN_STEPPER_FREQ, int max_freq = DEFAULT_MAX_STEPPER_FREQ)
+	/**
+	 * Constructor for Stepper motor driver
+	 * @param pul_pin The pin to use for the pulse signal
+	 * @param dir_pin The pin to use for the direction signal
+	 * @param min_freq The minimum frequency to use for the stepper motor. Default is 100 Hz
+	 * @param max_freq The maximum frequency to use for the stepper motor. Default is 2000 Hz
+	*/
+	Stepper(int pul_pin,
+			int dir_pin,
+			int min_freq = DEFAULT_MIN_STEPPER_FREQ,
+			int max_freq = DEFAULT_MAX_STEPPER_FREQ)
 	{
 		this->pul_pin = pul_pin;
 		this->dir_pin = dir_pin;
@@ -51,6 +63,10 @@ public:
 		pinMode(dir_pin, OUTPUT_OPENDRAIN);
 	}
 
+	/**
+	 * Set the speed of the stepper motor
+	 * @param speed The speed to set the motor to. -255 to 255
+	*/
 	void setSpeed(int speed)
 	{
 		int dir = speed < 0 ? 1 : 0;
@@ -72,10 +88,12 @@ public:
 		Serial.println("Speed: " + String(speed) + " Freq: " + String(freq_hz) + " Period: " + String(period_us));
 	}
 
+	/**
+	 * Update the pulse signal for the stepper motor
+	 * called by an interrupt timer at the stepper frequency
+	*/
 	void updatePin()
 	{
 		digitalToggleFast(this->pul_pin);
 	}
 };
-
-#endif // STEPPER_DRIVER_H
