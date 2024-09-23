@@ -2,80 +2,80 @@
 #define STEPPER_DRIVER_H
 
 #include <Arduino.h>
+#include "PITTimers.hpp"
 
 #define DEFAULT_MAX_STEPPER_FREQ 1000
 #define DEFAULT_MIN_STEPPER_FREQ 100
 
-class Stepper {
+class Stepper
+{
 private:
-    int pul_pin;
-    int dir_pin;
-    int min_freq_hz;
-    int max_freq_hz;
-    int freq_hz = 0;
-    unsigned long period_us = 0;
-    float lerp(float x, float a1, float b1, float a2, float b2){return a2 + (x - a1) * (b2 - a2) / (b1 - a1);}
-    elapsedMicros pulseTimer;
+	int pul_pin;
+	int dir_pin;
+	int min_freq_hz;
+	int max_freq_hz;
+	int timer_index;
+
+	float lerp(float x, float a1, float b1, float a2, float b2)
+	{
+		return a2 + (x - a1) * (b2 - a2) / (b1 - a1);
+	}
 
 public:
+	Stepper(int pul_pin, int dir_pin, int min_freq = DEFAULT_MIN_STEPPER_FREQ, int max_freq = DEFAULT_MAX_STEPPER_FREQ)
+	{
+		this->pul_pin = pul_pin;
+		this->dir_pin = dir_pin;
+		this->min_freq_hz = min_freq;
+		this->max_freq_hz = max_freq;
+		this->timer_index = -1;
 
-    /**
-     * Constructor for Stepper motor driver
-     * @param pul_pin The pin to use for the pulse signal
-     * @param dir_pin The pin to use for the direction signal
-     * @param min_freq The minimum frequency to use for the stepper motor. Default is 100 Hz
-     * @param max_freq The maximum frequency to use for the stepper motor. Default is 2000 Hz
-    */
-    Stepper(int pul_pin, int dir_pin, int min_freq = DEFAULT_MIN_STEPPER_FREQ, int max_freq = DEFAULT_MAX_STEPPER_FREQ) {
+		for (int i = 0; i < NUM_TIMERS; ++i)
+		{
+			if (timerCallbacks[i] == nullptr)
+			{
+				attachTimerCallback(i, [this]() { this->updatePin(); });
+				this->timer_index = i;
+				break;
+			}
+		}
 
-        //https://forum.pjrc.com/index.php?threads/using-the-open-drain-capabilities-of-the-teensy-3-1-processor.25393/
+		if (this->timer_index == -1)
+		{
+			Serial.print("More than ");
+			Serial.print(NUM_TIMERS);
+			Serial.println(" PIT steppers, the newest one will not be active");
+		}
 
-        this->pul_pin = pul_pin;
-        this->dir_pin = dir_pin;
-        this->min_freq_hz = min_freq;
-        this->max_freq_hz = max_freq;
-        
-        pinMode(pul_pin, OUTPUT_OPENDRAIN);
-        pinMode(dir_pin, OUTPUT_OPENDRAIN);
-    }
+		pinMode(pul_pin, OUTPUT_OPENDRAIN);
+		pinMode(dir_pin, OUTPUT_OPENDRAIN);
+	}
 
-    /**
-     * Set the speed of the stepper motor
-     * @param speed The speed to set the motor to. -255 to 255
-    */
-    void setSpeed(int speed) {
-        int dir = speed < 0 ? 1 : 0;
-        speed = abs(constrain(speed, -255, 255));
-        digitalWriteFast(dir_pin, dir);
-        if (speed == 0) {
-            digitalWriteFast(pul_pin, LOW);
-            freq_hz = 0;
-            period_us = 0;
-            return;
-        }
+	void setSpeed(int speed)
+	{
+		int dir = speed < 0 ? 1 : 0;
+		speed = abs(constrain(speed, -255, 255));
+		digitalWriteFast(this->dir_pin, dir);
 
-        freq_hz = (int) lerp(speed, 0, 255, min_freq_hz, max_freq_hz);
-        period_us = 100000 / freq_hz;
+		if (speed == 0)
+		{
+			digitalWriteFast(this->pul_pin, LOW);
+			setTimerFrequency(this->timer_index, 0);
+			return;
+		}
 
-        Serial.println("Speed: " + String(speed) + " Freq: " + String(freq_hz) + " Period: " + String(period_us));
-        
-    }
+		int freq_hz = (int) lerp(speed, 0, 255, this->min_freq_hz, this->max_freq_hz);
 
-    /**
-     * Update the pulse signal for the stepper motor
-     * must be called at sufficient frequency. very minimum of 3-4 times the period of the signal per second
-    */
-    void updatePin() {
-        if (freq_hz == 0) {
-            return;
-        }
+		setTimerFrequency(this->timer_index, freq_hz);
+		int period_us = 1000000 / freq_hz;
 
-        if (pulseTimer > period_us) {
-            pulseTimer = 0;
-            digitalToggleFast(pul_pin);
-        }
+		Serial.println("Speed: " + String(speed) + " Freq: " + String(freq_hz) + " Period: " + String(period_us));
+	}
 
-    }
+	void updatePin()
+	{
+		digitalToggleFast(this->pul_pin);
+	}
 };
 
 #endif // STEPPER_DRIVER_H
