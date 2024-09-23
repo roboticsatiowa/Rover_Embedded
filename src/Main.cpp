@@ -3,6 +3,9 @@
 #include "commands.hpp"
 #include "pinout.hpp"
 
+// Timers
+#include "PITTimers.hpp"
+
 // Hardware drivers
 #include "Sabertooth.hpp"
 #include "Stepper.hpp"
@@ -205,6 +208,9 @@ void setup()
   backWheelMotors = new Sabertooth(&BACK_WHEEL_SERIAL, Sabertooth::BAUD_38400);   // TX=1
   midWheelMotors = new Sabertooth(&MID_WHEEL_SERIAL, Sabertooth::BAUD_38400);     // TX=8
   frontWheelMotors = new Sabertooth(&FRONT_WHEEL_SERIAL, Sabertooth::BAUD_38400); // TX=24
+
+  // Initialize timers which will be used to control the steppers
+  setupPITs();
 
   // Initialize stepper motor pins as outputs
   baseMotor = new Stepper(BASEMOTOR_PUL, BASEMOTOR_DIR);
