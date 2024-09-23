@@ -1,4 +1,5 @@
 #pragma once
+
 #include <Arduino.h>
 #include "PITTimers.hpp"
 
@@ -19,9 +20,7 @@ private:
 			   float b1,
 			   float a2,
 			   float b2)
-	{
-		return a2 + (x - a1) * (b2 - a2) / (b1 - a1);
-	}
+	{ return a2 + (x - a1) * (b2 - a2) / (b1 - a1); }
 
 public:
 	/**
@@ -46,7 +45,9 @@ public:
 		{
 			if (timerCallbacks[i] == nullptr)
 			{
-				attachTimerCallback(i, [this]() { this->updatePin(); });
+				attachTimerCallback(i,
+									[this]()
+									{ this->updatePin(); });
 				this->timer_index = i;
 				break;
 			}
@@ -59,8 +60,10 @@ public:
 			Serial.println(" PIT steppers, the newest one will not be active");
 		}
 
-		pinMode(pul_pin, OUTPUT_OPENDRAIN);
-		pinMode(dir_pin, OUTPUT_OPENDRAIN);
+		pinMode(pul_pin,
+				OUTPUT_OPENDRAIN);
+		pinMode(dir_pin,
+				OUTPUT_OPENDRAIN);
 	}
 
 	/**
@@ -70,19 +73,29 @@ public:
 	void setSpeed(int speed)
 	{
 		int dir = speed < 0 ? 1 : 0;
-		speed = abs(constrain(speed, -255, 255));
-		digitalWriteFast(this->dir_pin, dir);
+		speed = abs(constrain(speed,
+							  -255,
+							  255));
+		digitalWriteFast(this->dir_pin,
+						 dir);
 
 		if (speed == 0)
 		{
-			digitalWriteFast(this->pul_pin, LOW);
-			setTimerFrequency(this->timer_index, 0);
+			digitalWriteFast(this->pul_pin,
+							 LOW);
+			setTimerFrequency(this->timer_index,
+							  0);
 			return;
 		}
 
-		int freq_hz = (int) lerp(speed, 0, 255, this->min_freq_hz, this->max_freq_hz);
+		int freq_hz = (int) lerp(speed,
+								 0,
+								 255,
+								 this->min_freq_hz,
+								 this->max_freq_hz);
 
-		setTimerFrequency(this->timer_index, freq_hz);
+		setTimerFrequency(this->timer_index,
+						  freq_hz);
 		int period_us = 1000000 / freq_hz;
 
 		Serial.println("Speed: " + String(speed) + " Freq: " + String(freq_hz) + " Period: " + String(period_us));

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 // macros
-#include "commands.h"
-#include "pinout.h"
+#include "commands.hpp"
+#include "pinout.hpp"
 
 // Hardware drivers
 #include "Sabertooth.hpp"
