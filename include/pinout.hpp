@@ -1,5 +1,4 @@
-#ifndef PINOUT_H
-#define PINOUT_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -44,5 +43,3 @@
 // ---------------- Misc Pin Assignments ----------------
 
 #define HEADLIGHT 9
-
-#endif

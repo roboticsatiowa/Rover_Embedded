@@ -5,8 +5,7 @@
 // TODO fix inconsistent naming
 // TODO convert to enum
 
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#pragma once
 
 enum COMMANDS
 {
@@ -40,5 +39,3 @@ enum COMMANDS
 
 #define READ_BATTERY_VOLTAGE 'g'
 #define BME_SENSOR 'b'
-
-#endif

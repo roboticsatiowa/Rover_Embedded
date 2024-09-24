@@ -1,6 +1,4 @@
-#ifndef SABERTOOTH2X25
-#define SABERTOOTH2X25
-
+#pragma once
 #include <Arduino.h>
 
 // Sabertooth2x25 motor driver. Operated in simplified serial mode
@@ -43,4 +41,3 @@ public:
         serial->write(motor << 7 | (int)lerp(speed, -255, 255, 1, 127));
     }
 };
-#endif

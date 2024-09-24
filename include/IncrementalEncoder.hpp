@@ -1,5 +1,4 @@
-#ifndef ENCODER_DRIVER_H
-#define ENCODER_DRIVER_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -96,6 +95,3 @@ public:
 
 IncrementalEncoder *IncrementalEncoder::encoders[16];
 int IncrementalEncoder::encoderCount = 0;
-
-
-#endif
