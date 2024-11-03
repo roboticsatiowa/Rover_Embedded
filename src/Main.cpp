@@ -254,7 +254,6 @@ void loop()
   baseMotor->updatePin();
   gripperMotor->updatePin();
 
-
   // Safety auto stop
   // if (millis() - lastCmd > AUTO_STOP_INTERVAL) {
   //   lastCmd = millis();
