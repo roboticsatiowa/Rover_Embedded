@@ -32,15 +32,45 @@ public:
         this->serial = serial;
         this->baudrate = baudrate;
         this->serial->begin(baudrate);
+
+        serial->write(0b10101010); 
+
     }
+
     /**
         * `setSpeed` sets the voltage of motor driver. Actual speed may vary due to load and battery voltage fluctuations.
-        * @param motor The motor to set the speed of. 0 (L) or 1 (R)
-        * @param speed The speed to set the motor to. -255 to 255
+        * @param motor The motor to set the speed of. 0 (L) or 1 (R). 
+        * @param speed The speed to set the motor to. -127 to 127.
     */
-    void setSpeed(int motor, int speed) {
-        speed = constrain(speed, -255, 255);
-        serial->write(motor << 7 | (int)lerp(speed, -255, 255, 1, 127));
+
+
+
+    void setSpeed(uint8_t motor, int8_t speed) { 
+        byte command; 
+        
+        if (motor != 0 || motor != 1) { 
+            printf("invalid motor"); 
+        }
+
+        if (motor == 1) { 
+            command = 4; 
+        } 
+
+        if (speed < 0) { 
+            command++; 
+            speed = -speed; 
+        }
+
+        speed = constrain(speed, 0, 127); 
+
+        int address = 130; 
+        byte checksum = (address + command + speed) & 0b01111111;
+
+        serial->write(address); 
+        serial->write(command); 
+        serial->write(speed); 
+        serial->write(checksum); 
+
     }
 };
 #endif
