@@ -1,7 +1,10 @@
 #include <Arduino.h>
 // macros
-#include "commands.h"
-#include "pinout.h"
+#include "commands.hpp"
+#include "pinout.hpp"
+
+// Timers
+#include "IntervalTimers.hpp"
 
 // Hardware drivers
 #include "Sabertooth.hpp"
@@ -244,15 +247,6 @@ void loop()
 {
 
   parseSerial();
-
-  // need to update pins manually because we are using an open collecter (common anode) configuration which isnt supported by the hardware pwm timer.
-  // see https://www.omc-stepperonline.com/download/DM542T.pdf section 4 for more info on open drain configuration
-
-  // TODO manually updating pins work fine for now but will be severely impacted by any blocking code. need to look into a better solution
-  wristInclinationMotor->updatePin();
-  wristRotationMotor->updatePin();
-  baseMotor->updatePin();
-  gripperMotor->updatePin();
 
   // Safety auto stop
   // if (millis() - lastCmd > AUTO_STOP_INTERVAL) {
