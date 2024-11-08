@@ -5,7 +5,7 @@
 
 // Hardware drivers
 #include "Sabertooth.hpp"
-#include "Stepper.hpp"
+#include "StepperDriver.hpp"
 #include "IncrementalEncoder.hpp"
 #include "BME280.hpp"
 
@@ -24,10 +24,10 @@ Sabertooth *midWheelMotors;
 Sabertooth *frontWheelMotors;
 
 // Stepper motors
-Stepper *baseMotor;
-Stepper *wristInclinationMotor;
-Stepper *wristRotationMotor;
-Stepper *gripperMotor;
+StepperDriver *baseMotor;
+StepperDriver *wristInclinationMotor;
+StepperDriver *wristRotationMotor;
+StepperDriver *gripperMotor;
 
 // Encoders
 IncrementalEncoder *baseEncoder;
@@ -207,10 +207,14 @@ void setup()
   frontWheelMotors = new Sabertooth(&FRONT_WHEEL_SERIAL, Sabertooth::BAUD_38400); // TX=24
 
   // Initialize stepper motor pins as outputs
-  baseMotor = new Stepper(BASEMOTOR_PUL, BASEMOTOR_DIR);
-  wristInclinationMotor = new Stepper(WRIST_INCLINATION_PUL, WRIST_INCLINATION_DIR);
-  wristRotationMotor = new Stepper(WRIST_ROTATION_PUL, WRIST_ROTATION_DIR);
-  gripperMotor = new Stepper(GRIPPER_PUL, GRIPPER_DIR);
+  baseMotor = new StepperDriver(BASEMOTOR_PUL, BASEMOTOR_DIR);
+  baseMotor.init();
+  wristInclinationMotor = new StepperDriver(WRIST_INCLINATION_PUL, WRIST_INCLINATION_DIR);
+  wristInclinationMotor.init();
+  wristRotationMotor = new StepperDriver(WRIST_ROTATION_PUL, WRIST_ROTATION_DIR);
+  wristRotationMotor.init();
+  gripperMotor = new StepperDriver(GRIPPER_PUL, GRIPPER_DIR);
+  gripperMotor.init();
 
   // Initialize encoders
   // baseEncoder = new IncrementalEncoder(BASEMOTOR_ENC_A, BASEMOTOR_ENC_B);
