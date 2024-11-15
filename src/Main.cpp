@@ -1,4 +1,5 @@
 #include <Arduino.h>
+
 // macros
 #include "commands.h"
 #include "pinout.h"
@@ -241,11 +242,31 @@ void setup()
   Wire.begin();
   // pinMode(GLOBAL_ENABLE, OUTPUT);
   // digitalWrite(GLOBAL_ENABLE, HIGH);
+
+}
+
+void enableWatdog()
+{
+  noInterrupts();
+  //Enable watchdog
+  IOMUXC_GPR_GPR16 = IOMUXC_GPR_GPR16 & ~(0x7F) | IOMUXC_GPR_GPR16_INIT_ITCM_EN(1);
+  IMXRT_WODG1.WCR |= WDOG_WCR_WDE | WDOG_WCR_WDA;
+  interrupts();
+}
+
+void resetWatchdog()
+{
+  noInterrupts();
+  //Enable watchdog
+  IMXRT_WDOG1.WSR = 0x5555;
+  IMXRT_WDOG1.WSR = 0xAAAA;
+  interrupts();
 }
 
 // Main loop. Arduino library will call this function repeatedly.
 void loop()
 {
+  watchdog.reset()
 
   parseSerial();
 
