@@ -5,9 +5,10 @@
 
 // Sabertooth2x25 motor driver. Operated in simplified serial mode
 // https://www.dimensionengineering.com/datasheets/Sabertooth2x25v2.pdf
-class Sabertooth {
+class SabertoothDriver {
 private:
     int baudrate;
+    byte address; 
     HardwareSerialIMXRT *serial;
     float lerp(float x, float a1, float b1, float a2, float b2){return a2 + (x - a1) * (b2 - a2) / (b1 - a1);}
 
@@ -22,34 +23,38 @@ public:
         * @param serial The serial port to use
         * @param baudrate The baudrate to use. Valid values are 2400, 9600, 19200, 38400
     */
-    Sabertooth(HardwareSerialIMXRT *serial, BAUDRATE baudrate) {
+    SabertoothDriver(byte address, BAUDRATE baudrate) {
         // ensure valid baudrate. probably a better way to do this
         if (baudrate != BAUD_2400 && baudrate != BAUD_9600 && baudrate != BAUD_19200 && baudrate != BAUD_38400) {
             baudrate = BAUD_9600;
             return;
         }
-
-        this->serial = serial;
         this->baudrate = baudrate;
+        this->address = address; 
+    }
+
+    void init(HardwareSerialIMXRT *serial) { 
+        this->serial = serial;
         this->serial->begin(baudrate);
 
-        serial->write(0b10101010); 
+        delay(2000); 
 
+        // baud rate is set by sending bauding character (170 in dec). 
+        serial->write(0b10101010); 
     }
+
 
     /**
         * `setSpeed` sets the voltage of motor driver. Actual speed may vary due to load and battery voltage fluctuations.
-        * @param motor The motor to set the speed of. 0 (L) or 1 (R). 
+        * @param motor The motor to set the speed of. 0 (L) or 1 (R). motor 1 is controlled by 0 - forward, 1 - back. motor 
+        * 2 is controlled by 4 - forward and 5 - back. 
         * @param speed The speed to set the motor to. -127 to 127.
     */
-
-
 
     void setSpeed(uint8_t motor, int8_t speed) { 
         byte command; 
         
         if (motor != 0 || motor != 1) { 
-            printf("invalid motor"); 
         }
 
         if (motor == 1) { 
@@ -63,7 +68,6 @@ public:
 
         speed = constrain(speed, 0, 127); 
 
-        int address = 130; 
         byte checksum = (address + command + speed) & 0b01111111;
 
         serial->write(address); 
