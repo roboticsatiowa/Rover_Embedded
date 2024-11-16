@@ -24,5 +24,21 @@ jobs:
       - name: Verify PlatformIO installation
         run: platformio --version
 
+      - name: Install lcov
+        run: sudo apt-get update && sudo apt-get install -y lcov
+
       - name: Run PlatformIO unit tests
         run: pio test -e native
+
+      - name: Generate Coverage Report
+        run: |
+          mkdir -p coverage
+          lcov --directory .pio/build/native --capture --output-file coverage/coverage.info
+          lcov --remove coverage/coverage.info '/usr/*' --output-file coverage/coverage.info
+          lcov --list coverage/coverage.info
+
+      - name: Upload Coverage Report as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage/coverage.info
