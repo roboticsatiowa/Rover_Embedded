@@ -57,6 +57,10 @@ public:
         if (motor != 0 || motor != 1) { 
         }
 
+        if (motor == 0) { 
+            command = 0; 
+        }
+
         if (motor == 1) { 
             command = 4; 
         } 
@@ -69,7 +73,7 @@ public:
         speed = constrain(speed, 0, 127); 
 
         byte checksum = (address + command + speed) & 0b01111111;
-
+        
         serial->write(address); 
         serial->write(command); 
         serial->write(speed); 
