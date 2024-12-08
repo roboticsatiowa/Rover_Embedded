@@ -18,10 +18,13 @@ long lastCmd = AUTO_STOP_INTERVAL;
 int showWarning = 1;
 
 // Motor controllers
-Sabertooth *armActuators;
-Sabertooth *backWheelMotors;
-Sabertooth *midWheelMotors;
-Sabertooth *frontWheelMotors;
+SabertoothDriver *armActuators;
+SabertoothDriver *backWheelMotors;
+SabertoothDriver *midWheelMotors;
+SabertoothDriver *frontWheelMotors;
+
+// hard-coded adress for sabertooth
+byte address = 130; 
 
 // Stepper motors
 StepperDriver *baseMotor;
@@ -201,10 +204,14 @@ void setup()
   Serial.begin(BAUDRATE);
 
   // Initialize motor controllers
-  armActuators = new Sabertooth(&LINEAR_ACTUATOR_SERIAL, Sabertooth::BAUD_38400); // RX=28, TX=29
-  backWheelMotors = new Sabertooth(&BACK_WHEEL_SERIAL, Sabertooth::BAUD_38400);   // TX=1
-  midWheelMotors = new Sabertooth(&MID_WHEEL_SERIAL, Sabertooth::BAUD_38400);     // TX=8
-  frontWheelMotors = new Sabertooth(&FRONT_WHEEL_SERIAL, Sabertooth::BAUD_38400); // TX=24
+  armActuators = new SabertoothDriver(130, SabertoothDriver::BAUD_38400); // RX=28, TX=29
+  armActuators->init(&LINEAR_ACTUATOR_SERIAL); 
+  backWheelMotors = new SabertoothDriver(130, SabertoothDriver::BAUD_38400);   // TX=1
+  backWheelMotors->init(&BACK_WHEEL_SERIAL); 
+  midWheelMotors = new SabertoothDriver(130, SabertoothDriver::BAUD_38400);     // TX=8
+  midWheelMotors->init(&MID_WHEEL_SERIAL); 
+  frontWheelMotors = new SabertoothDriver(130, SabertoothDriver::BAUD_38400); // TX=24
+  frontWheelMotors->init(&FRONT_WHEEL_SERIAL); 
 
   // Initialize stepper motor pins as outputs
   baseMotor = new StepperDriver(BASEMOTOR_PUL, BASEMOTOR_DIR);
