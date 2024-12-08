@@ -40,7 +40,7 @@ public:
         delay(2000); 
 
         // baud rate is set by sending bauding character (170 in dec). 
-        serial->write(0b10101010); 
+        serial->write(0xAA); 
     }
 
 
