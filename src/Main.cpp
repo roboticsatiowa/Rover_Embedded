@@ -8,6 +8,7 @@
 #include "StepperDriver.hpp"
 #include "IncrementalEncoder.hpp"
 #include "BME280.hpp"
+#include <WDT_T4.h> 
 
 #define BAUDRATE 115200         // Teensy <---> Jetson
 #define AUTO_STOP_INTERVAL 2000 // milliseconds
@@ -196,9 +197,10 @@ void parseSerial()
 // --------------------------------------------
 
 void setup()
-{
+{  
   // Main serial port for communication with Jetson
   Serial.begin(BAUDRATE);
+  
 
   // Initialize motor controllers
   armActuators = new Sabertooth(&LINEAR_ACTUATOR_SERIAL, Sabertooth::BAUD_38400); // RX=28, TX=29
@@ -241,12 +243,14 @@ void setup()
   Wire.begin();
   // pinMode(GLOBAL_ENABLE, OUTPUT);
   // digitalWrite(GLOBAL_ENABLE, HIGH);
+
+  // Start Watchdog Timer
+  wdt.begin(AUTO_STOP_INTERVAL);
 }
 
 // Main loop. Arduino library will call this function repeatedly.
 void loop()
 {
-
   parseSerial();
 
   // need to update pins manually because we are using an open collecter (common anode) configuration which isnt supported by the hardware pwm timer.
@@ -264,4 +268,7 @@ void loop()
   //   stopAllMotors();
   //   Serial.println("STOPPING");
   // }
+
+  // Watchdog starts feeding
+  wdt.feed();
 }
