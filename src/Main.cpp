@@ -8,7 +8,7 @@
 #include "StepperDriver.hpp"
 #include "IncrementalEncoder.hpp"
 #include "BME280.hpp"
-#include <WDT_T4.h> 
+#include "Watchdog_t4.h"
 
 #define BAUDRATE 115200         // Teensy <---> Jetson
 #define AUTO_STOP_INTERVAL 2000 // milliseconds
