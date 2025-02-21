@@ -8,6 +8,7 @@
 #include "Stepper.hpp"
 #include "IncrementalEncoder.hpp"
 #include "BME280.hpp"
+#include "Watchdog_t4.h"
 
 #define BAUDRATE 115200         // Teensy <---> Jetson
 #define AUTO_STOP_INTERVAL 2000 // milliseconds
@@ -36,6 +37,9 @@ IncrementalEncoder *wristRotationEncoder;
 IncrementalEncoder *gripperEncoder;
 
 BME280 bme;
+
+// Watchdog
+WDT_T4<WDT1> wdt;
 
 // lists for easy iteration and indexing when parsing commands
 
@@ -237,6 +241,11 @@ void setup()
   Wire.begin();
   // pinMode(GLOBAL_ENABLE, OUTPUT);
   // digitalWrite(GLOBAL_ENABLE, HIGH);
+
+  // Start Watchdog
+  WDT_timings_t config;
+  config.timeout = 2; /* in seconds, 0->128 */
+  wdt.begin(config);
 }
 
 // Main loop. Arduino library will call this function repeatedly.
@@ -260,4 +269,7 @@ void loop()
   //   stopAllMotors();
   //   Serial.println("STOPPING");
   // }
+
+  // Feed Watchdog
+  wdt.feed();
 }
