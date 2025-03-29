@@ -28,11 +28,15 @@
 #define GRIPPER_ENC_B 36
 
 // ---------------- Serial Port Assignments ----------------
-
 #define LINEAR_ACTUATOR_SERIAL Serial7  // RX=28, TX=29
-#define BACK_WHEEL_SERIAL Serial1       // RX=0,  TX=1
-#define MID_WHEEL_SERIAL Serial2        // RX=7,  TX=8
-#define FRONT_WHEEL_SERIAL Serial6      // RX=25, TX=24
+#define BACK_WHEEL_SERIAL Serial7       // RX=0,  TX=1
+#define MID_WHEEL_SERIAL Serial7        // RX=7,  TX=8
+#define FRONT_WHEEL_SERIAL Serial7      // RX=25, TX=24
+
+// #define LINEAR_ACTUATOR_SERIAL Serial7  // RX=28, TX=29
+// #define BACK_WHEEL_SERIAL Serial1       // RX=0,  TX=1
+// #define MID_WHEEL_SERIAL Serial2        // RX=7,  TX=8
+// #define FRONT_WHEEL_SERIAL Serial6      // RX=25, TX=24
 
 // ---------------- Potentiometer Pin Assignments ----------------
 
