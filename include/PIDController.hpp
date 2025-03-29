@@ -1,6 +1,4 @@
-#ifndef PIDCONTROLLER
-#define PIDCONTROLLER
-
+#pragma once
 #include <Arduino.h>
 
 class PIDController {
@@ -90,5 +88,3 @@ public:
 
 
 };
-
-#endif // PIDCONTROLLER
