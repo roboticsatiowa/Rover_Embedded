@@ -22,6 +22,7 @@ enum COMMANDS
   DISABLE_PINS = 'd',
   WARNING_LIGHT = 'w',
   READ_BATTERY_VOLTAGE = 'g'
+  MORSE_CODE = 'v' 
 };
 
 #define READ_ENCODER 'e'                // e [encoder id]
