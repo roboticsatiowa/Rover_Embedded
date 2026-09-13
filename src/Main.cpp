@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Servo.h>
 // macros
 #include "commands.h"
 #include "pinout.h"
@@ -63,25 +64,6 @@ void stopAllMotors()
   baseMotor->setSpeed(0);
   wristInclinationMotor->setSpeed(0);
   wristRotationMotor->setSpeed(0);
-}
-
-void setCameraMountSpeed(int direction)
-{
-  if (direction > 0)
-  {
-    digitalWrite(CAMERA_MOUNT_MOTOR_IN1, HIGH);
-    digitalWrite(CAMERA_MOUNT_MOTOR_IN2, LOW);
-  }
-  else if (direction < 0)
-  {
-    digitalWrite(CAMERA_MOUNT_MOTOR_IN1, LOW);
-    digitalWrite(CAMERA_MOUNT_MOTOR_IN2, HIGH);
-  }
-  else
-  {
-    digitalWrite(CAMERA_MOUNT_MOTOR_IN1, LOW);
-    digitalWrite(CAMERA_MOUNT_MOTOR_IN2, LOW);
-  }
 }
 
 void setCameraMountSpeed(int direction)
@@ -172,41 +154,30 @@ int runCommand(char cmd, String args[], int numArgs)
     break;
 
   case HAND_SERVO:
-    gripperArg = args[0].toInt();
+  {
+    int gripperArg = args[0].toInt();
 
-    // 1 = open
     if (gripperArg == 1)
     {
         gripperAngle -= GRIPPER_STEP;
-
         if (gripperAngle < GRIPPER_ANGLE_OPENED)
-        {
             gripperAngle = GRIPPER_ANGLE_OPENED;
-        }
-
         handServo.write(gripperAngle);
-
         Serial.print("Opening gripper: ");
         Serial.println(gripperAngle);
     }
-
-    // -1 = close
     else if (gripperArg == -1)
     {
         gripperAngle += GRIPPER_STEP;
-
         if (gripperAngle > GRIPPER_ANGLE_CLOSED)
-        {
             gripperAngle = GRIPPER_ANGLE_CLOSED;
-        }
-
         handServo.write(gripperAngle);
-
         Serial.print("Closing gripper: ");
         Serial.println(gripperAngle);
     }
 
     break;
+  }
 
   // TODO: ADD in the headlight command and camera mount commands
   case CAMERA_MOUNT:
@@ -348,7 +319,6 @@ void loop()
   wristInclinationMotor->updatePin();
   wristRotationMotor->updatePin();
   baseMotor->updatePin();
-  gripperMotor->updatePin();
 
   // Safety auto stop
   // if (millis() - lastCmd > AUTO_STOP_INTERVAL) {
