@@ -5,6 +5,7 @@
 #include "pinout.h"
 
 // Hardware drivers
+#include "CytronMotorDriver.h"
 #include "Sabertooth.hpp"
 #include "Stepper.hpp"
 #include "IncrementalEncoder.hpp"
@@ -25,11 +26,16 @@ int headlight_state = 0;
 long lastCmd = AUTO_STOP_INTERVAL;
 int showWarning = 1;
 
+//temp for science demo
+int scienceMotorSpin = 0;
+
 // Motor controllers
 Sabertooth *armActuators;
 Sabertooth *backWheelMotors;
 Sabertooth *midWheelMotors;
 Sabertooth *frontWheelMotors;
+
+CytronMD *scienceMotor;
 
 // Stepper motors
 Stepper *baseMotor;
@@ -64,6 +70,7 @@ void stopAllMotors()
   baseMotor->setSpeed(0);
   wristInclinationMotor->setSpeed(0);
   wristRotationMotor->setSpeed(0);
+  scienceMotor->setSpeed(0);
 }
 
 void setCameraMountSpeed(int direction)
@@ -165,6 +172,17 @@ int runCommand(char cmd, String args[], int numArgs)
         handServo.write(gripperAngle);
         Serial.print("Opening gripper: ");
         Serial.println(gripperAngle);
+
+	      //this is very temporary, hijacking this for science drill just for science mission demo
+	      //we will remove this and do better stuff once actual science module is developed
+	if(scienceMotorSpin == 1){
+          scienceMotor->setSpeed(0);
+          scienceMotorSpin = 0;
+        }
+        else{
+          scienceMotor->setSpeed(250);
+          scienceMotorSpin = 1;
+        }
     }
     else if (gripperArg == -1)
     {
@@ -174,6 +192,17 @@ int runCommand(char cmd, String args[], int numArgs)
         handServo.write(gripperAngle);
         Serial.print("Closing gripper: ");
         Serial.println(gripperAngle);
+
+	      //this is very temporary, hijacking this for science drill just for science mission demo
+	      //we will remove this and do better stuff once actual science module is developed
+      if(scienceMotorSpin == -1){
+          scienceMotor->setSpeed(0);
+          scienceMotorSpin = 0;
+        }
+        else{
+          scienceMotor->setSpeed(-150);
+          scienceMotorSpin = -1;
+        }
     }
 
     break;
@@ -258,6 +287,8 @@ void setup()
   backWheelMotors = new Sabertooth(&BACK_WHEEL_SERIAL, Sabertooth::BAUD_38400);   // TX=1
   midWheelMotors = new Sabertooth(&MID_WHEEL_SERIAL, Sabertooth::BAUD_38400);     // TX=8
   frontWheelMotors = new Sabertooth(&FRONT_WHEEL_SERIAL, Sabertooth::BAUD_38400); // TX=24
+  scienceMotor = new CytronMD(PWM_DIR, SCIENCE_MOTOR_PWM, SCIENCE_MOTOR_DIR);
+
 
   // Initialize stepper motor pins as outputs
   baseMotor = new Stepper(BASEMOTOR_PUL, BASEMOTOR_DIR);
@@ -330,3 +361,4 @@ void loop()
   // Feed Watchdog
   wdt.feed();
 }
+

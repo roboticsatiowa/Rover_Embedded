@@ -24,10 +24,8 @@
 
 #define HAND_GRIPPER_SERVO 11
 
-//#define GRIPPER_PUL 33
-//#define GRIPPER_DIR 34 
-//#define GRIPPER_ENC_A 35
-//#define GRIPPER_ENC_B 36
+//#define SCIENCE_MOTOR_PWM 33
+//#define SCIENCE_MOTOR_DIR 34 
 
 // ----------------- Camera Mount Motor ---------------------------
 
