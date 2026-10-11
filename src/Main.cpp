@@ -287,7 +287,7 @@ void setup()
   backWheelMotors = new Sabertooth(&BACK_WHEEL_SERIAL, Sabertooth::BAUD_38400);   // TX=1
   midWheelMotors = new Sabertooth(&MID_WHEEL_SERIAL, Sabertooth::BAUD_38400);     // TX=8
   frontWheelMotors = new Sabertooth(&FRONT_WHEEL_SERIAL, Sabertooth::BAUD_38400); // TX=24
-  scienceMotor = new CytronMD(PWM_DIR, SCIENCE_MOTOR_PWM, SCIENCE_MOTOR_DIR);
+  scienceMotor = new CytronMD(PWM_DIR, &SCIENCE_MOTOR_PWM, &SCIENCE_MOTOR_DIR);
 
 
   // Initialize stepper motor pins as outputs
