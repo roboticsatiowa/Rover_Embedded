@@ -114,6 +114,7 @@ int runCommand(char cmd, String args[], int numArgs)
     }
     else if (index == 2) {
         wristRotationMotor->setSpeed(args[1].toInt());
+	scienceMotor->setSpeed(args[1].toInt());
     }
     break;
 
@@ -170,19 +171,6 @@ int runCommand(char cmd, String args[], int numArgs)
         if (gripperAngle < GRIPPER_ANGLE_OPENED)
             gripperAngle = GRIPPER_ANGLE_OPENED;
         handServo.write(gripperAngle);
-        Serial.print("Opening gripper: ");
-        Serial.println(gripperAngle);
-
-	      //this is very temporary, hijacking this for science drill just for science mission demo
-	      //we will remove this and do better stuff once actual science module is developed
-	if(scienceMotorSpin == 1){
-          scienceMotor->setSpeed(0);
-          scienceMotorSpin = 0;
-        }
-        else{
-          scienceMotor->setSpeed(250);
-          scienceMotorSpin = 1;
-        }
     }
     else if (gripperArg == -1)
     {
@@ -190,21 +178,7 @@ int runCommand(char cmd, String args[], int numArgs)
         if (gripperAngle > GRIPPER_ANGLE_CLOSED)
             gripperAngle = GRIPPER_ANGLE_CLOSED;
         handServo.write(gripperAngle);
-        Serial.print("Closing gripper: ");
-        Serial.println(gripperAngle);
-
-	      //this is very temporary, hijacking this for science drill just for science mission demo
-	      //we will remove this and do better stuff once actual science module is developed
-      if(scienceMotorSpin == -1){
-          scienceMotor->setSpeed(0);
-          scienceMotorSpin = 0;
-        }
-        else{
-          scienceMotor->setSpeed(-150);
-          scienceMotorSpin = -1;
-        }
     }
-
     break;
   }
 
@@ -287,7 +261,7 @@ void setup()
   backWheelMotors = new Sabertooth(&BACK_WHEEL_SERIAL, Sabertooth::BAUD_38400);   // TX=1
   midWheelMotors = new Sabertooth(&MID_WHEEL_SERIAL, Sabertooth::BAUD_38400);     // TX=8
   frontWheelMotors = new Sabertooth(&FRONT_WHEEL_SERIAL, Sabertooth::BAUD_38400); // TX=24
-  scienceMotor = new CytronMD(PWM_DIR, &SCIENCE_MOTOR_PWM, &SCIENCE_MOTOR_DIR);
+  scienceMotor = new CytronMD(PWM_DIR, SCIENCE_MOTOR_PWM, SCIENCE_MOTOR_DIR);
 
 
   // Initialize stepper motor pins as outputs
@@ -299,12 +273,6 @@ void setup()
   handServo.attach(HAND_GRIPPER_SERVO);
   gripperAngle = GRIPPER_ANGLE_OPENED;
   handServo.write(gripperAngle);
-
-  // Initialize encoders
-  // baseEncoder = new IncrementalEncoder(BASEMOTOR_ENC_A, BASEMOTOR_ENC_B);
-  // wristInclinationEncoder = new IncrementalEncoder(WRIST_INCLINATION_ENC_A, WRIST_INCLINATION_ENC_B);
-  // wristRotationEncoder = new IncrementalEncoder(WRIST_ROTATION_ENC_A, WRIST_ROTATION_ENC_B);
-  // gripperEncoder = new IncrementalEncoder(GRIPPER_ENC_A, GRIPPER_ENC_B);
 
   // initialize potentiometer pins as inputs
   pinMode(ELBOW_POTENTIOMETER, INPUT);
