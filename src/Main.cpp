@@ -4,6 +4,8 @@
 #include "commands.h"
 #include "pinout.h"
 
+//EDIT TEST 123
+
 // Hardware drivers
 #include "CytronMotorDriver.h"
 #include "Sabertooth.hpp"
@@ -15,9 +17,9 @@
 #define BAUDRATE 115200         // Teensy <---> Jetson
 #define AUTO_STOP_INTERVAL 2000 // milliseconds
 
-#define GRIPPER_ANGLE_OPENED 0
-#define GRIPPER_ANGLE_CLOSED 90
-#define GRIPPER_STEP 5
+#define GRIPPER_ANGLE_OPENED 22//0
+#define GRIPPER_ANGLE_CLOSED 40//90
+#define GRIPPER_STEP 1//5
 
 int gripperAngle = GRIPPER_ANGLE_OPENED;
 
@@ -114,6 +116,7 @@ int runCommand(char cmd, String args[], int numArgs)
     }
     else if (index == 2) {
         wristRotationMotor->setSpeed(args[1].toInt());
+	scienceMotor->setSpeed(args[1].toInt());
     }
     break;
 
@@ -162,6 +165,8 @@ int runCommand(char cmd, String args[], int numArgs)
 
   case HAND_SERVO:
   {
+    Serial.print("Hand Servo is a thing that is happening");
+
     int gripperArg = args[0].toInt();
 
     if (gripperArg == 1)
@@ -173,16 +178,6 @@ int runCommand(char cmd, String args[], int numArgs)
         Serial.print("Opening gripper: ");
         Serial.println(gripperAngle);
 
-	      //this is very temporary, hijacking this for science drill just for science mission demo
-	      //we will remove this and do better stuff once actual science module is developed
-	if(scienceMotorSpin == 1){
-          scienceMotor->setSpeed(0);
-          scienceMotorSpin = 0;
-        }
-        else{
-          scienceMotor->setSpeed(250);
-          scienceMotorSpin = 1;
-        }
     }
     else if (gripperArg == -1)
     {
@@ -193,16 +188,6 @@ int runCommand(char cmd, String args[], int numArgs)
         Serial.print("Closing gripper: ");
         Serial.println(gripperAngle);
 
-	      //this is very temporary, hijacking this for science drill just for science mission demo
-	      //we will remove this and do better stuff once actual science module is developed
-      if(scienceMotorSpin == -1){
-          scienceMotor->setSpeed(0);
-          scienceMotorSpin = 0;
-        }
-        else{
-          scienceMotor->setSpeed(-150);
-          scienceMotorSpin = -1;
-        }
     }
 
     break;
@@ -335,7 +320,9 @@ void setup()
   WDT_timings_t config;
   config.timeout = 2; /* in seconds, 0->128 */
   wdt.begin(config);
+
 }
+
 
 // Main loop. Arduino library will call this function repeatedly.
 void loop()

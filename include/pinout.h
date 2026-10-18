@@ -23,9 +23,9 @@
 #define WRIST_ROTATION_ENC_B 40
 
 #define HAND_GRIPPER_SERVO 11
-
-//#define SCIENCE_MOTOR_PWM 33
-//#define SCIENCE_MOTOR_DIR 34 
+#define SCIENCE_SERVO 12
+#define SCIENCE_MOTOR_PWM 33
+#define SCIENCE_MOTOR_DIR 34 
 
 // ----------------- Camera Mount Motor ---------------------------
 
