@@ -175,9 +175,12 @@ int runCommand(char cmd, String args[], int numArgs)
         if (gripperAngle < GRIPPER_ANGLE_OPENED)
             gripperAngle = GRIPPER_ANGLE_OPENED;
         handServo.write(gripperAngle);
+<<<<<<< HEAD
         Serial.print("Opening gripper: ");
         Serial.println(gripperAngle);
 
+=======
+>>>>>>> 6406e9a47c9c85b80700ae4d6f016fb4c5b798af
     }
     else if (gripperArg == -1)
     {
@@ -185,11 +188,13 @@ int runCommand(char cmd, String args[], int numArgs)
         if (gripperAngle > GRIPPER_ANGLE_CLOSED)
             gripperAngle = GRIPPER_ANGLE_CLOSED;
         handServo.write(gripperAngle);
+<<<<<<< HEAD
         Serial.print("Closing gripper: ");
         Serial.println(gripperAngle);
 
+=======
+>>>>>>> 6406e9a47c9c85b80700ae4d6f016fb4c5b798af
     }
-
     break;
   }
 
@@ -284,12 +289,6 @@ void setup()
   handServo.attach(HAND_GRIPPER_SERVO);
   gripperAngle = GRIPPER_ANGLE_OPENED;
   handServo.write(gripperAngle);
-
-  // Initialize encoders
-  // baseEncoder = new IncrementalEncoder(BASEMOTOR_ENC_A, BASEMOTOR_ENC_B);
-  // wristInclinationEncoder = new IncrementalEncoder(WRIST_INCLINATION_ENC_A, WRIST_INCLINATION_ENC_B);
-  // wristRotationEncoder = new IncrementalEncoder(WRIST_ROTATION_ENC_A, WRIST_ROTATION_ENC_B);
-  // gripperEncoder = new IncrementalEncoder(GRIPPER_ENC_A, GRIPPER_ENC_B);
 
   // initialize potentiometer pins as inputs
   pinMode(ELBOW_POTENTIOMETER, INPUT);
