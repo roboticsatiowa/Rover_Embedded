@@ -125,10 +125,9 @@ int runCommand(char cmd, String args[], int numArgs)
 
   case MOTOR_RAW:
     // TODO individual motor speeds for easier turning and such
-    int leftSide = args[0].toInt()+args[1].toInt(), rightSide = args[0].toInt()-args[1].toInt();
-    backWheelMotors->setSpeed(leftSide, rightSide);
-    midWheelMotors->setSpeed(leftSide, rightSide);
-    frontWheelMotors->setSpeed(leftSide, rightSide);
+    backWheelMotors->setSpeed(args[0].toInt(), args[1].toInt());
+    midWheelMotors->setSpeed(args[0].toInt(), args[1].toInt());
+    frontWheelMotors->setSpeed(args[0].toInt(), args[1].toInt());
     // Serial.println(String(args[0].toInt()) + " " + String(args[1].toInt()));
     break;
 
